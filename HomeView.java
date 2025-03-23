@@ -5,9 +5,9 @@ import javax.swing.*;
 import java.awt.*;
 
 public class HomeView extends JFrame {
+    private HomeController controller;
     private JPanel mainPanel; // Panel to load different content dynamically
     private JProgressBar progressBar;
-    private HomeController controller;
 
     public HomeView() {
         setTitle("File Encryption & Decryption");

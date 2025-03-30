@@ -1,6 +1,7 @@
 package com.tech_titans.view;
 
 import com.tech_titans.controller.HomeController;
+import com.tech_titans.model.EncryptionModel;
 import com.tech_titans.service.EncryptionService;
 
 import javax.swing.*;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Base64;
+import java.util.Enumeration;
 import java.util.Scanner;
 
 public class HomeView extends JFrame {
@@ -101,7 +103,7 @@ public class HomeView extends JFrame {
         openFileItem.addActionListener(controller::handleOpenFile);
         exitItem.addActionListener(e -> System.exit(0));
         encryptOption.addActionListener(controller::handleFileEncrypt);
-        // encryptOption2.addActionListener(controller::handleTextEncrypt);
+        encryptOption2.addActionListener(controller::handleTextEncrypt);
         decryptOption.addActionListener(controller::handleDecrypt);
         settingsOption.addActionListener(controller::handleSettings);
         aboutOption.addActionListener(controller::handleHelp);
@@ -360,6 +362,30 @@ public class HomeView extends JFrame {
             }
         });
 
+        JButton savekeyButton = new JButton("Save Key Details");
+        savekeyButton.addActionListener(e -> {
+            try {
+                // Prompt the user to select a save location
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setDialogTitle("Save Encryption Details");
+                fileChooser.setSelectedFile(new File("Encryption_Details.txt"));
+                
+                int userSelection = fileChooser.showSaveDialog(null);
+                
+                if (userSelection == JFileChooser.APPROVE_OPTION) {
+                    File saveFile = fileChooser.getSelectedFile();
+                    
+                    // Write encryption details to file
+                    saveEncryptionDetails(saveFile,cipherModeComboBox,paddingComboBox,ivString,keySizeComboBox,key,formatGroup);
+                    
+                    JOptionPane.showMessageDialog(null, "Encryption details saved successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                }
+                
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, "Error saving encryption details: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
         // Progress Bar
         operationProgressBar = new JProgressBar();
         operationProgressBar.setStringPainted(true);
@@ -368,6 +394,7 @@ public class HomeView extends JFrame {
         buttonPanel.add(encryptButton);
         buttonPanel.add(clearButton);
         buttonPanel.add(showoutButton);
+        buttonPanel.add(savekeyButton);
         // Main layout
         JPanel contentPanel = new JPanel(new BorderLayout());
         contentPanel.add(topPanel, BorderLayout.NORTH);
@@ -399,6 +426,253 @@ public class HomeView extends JFrame {
         return contentPanel;
     }
 
+    public JPanel TextEncryptionView(){
+        // Center section - Input/Output Text Areas
+        JPanel centerPanel = new JPanel(new GridLayout(2, 1, 0, 10));
+        
+        // Input panel
+        JPanel inputPanel = new JPanel(new BorderLayout());
+        inputPanel.setBorder(BorderFactory.createTitledBorder("Input Text"));
+        inputTextArea = new JTextArea(8, 40);
+        inputTextArea.setLineWrap(true);
+        inputTextArea.setWrapStyleWord(true);
+        JScrollPane inputScrollPane = new JScrollPane(inputTextArea);
+        inputPanel.add(inputScrollPane, BorderLayout.CENTER);
+        inputTextArea.setEditable(true);
+        
+        // Output panel
+        JPanel outputPanel = new JPanel(new BorderLayout());
+        outputPanel.setBorder(BorderFactory.createTitledBorder("Encrypted Output"));
+        outputTextArea = new JTextArea(8, 40);
+        outputTextArea.setLineWrap(true);
+        outputTextArea.setWrapStyleWord(true);
+        JScrollPane outputScrollPane = new JScrollPane(outputTextArea);
+        outputPanel.add(outputScrollPane, BorderLayout.CENTER);
+        
+        centerPanel.add(inputPanel);
+        centerPanel.add(outputPanel);
+        
+        // Right section - Encryption options
+        JPanel rightPanel = new JPanel();
+        rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
+        rightPanel.setBorder(BorderFactory.createTitledBorder("Encryption Options"));
+        
+        // Cipher Mode
+        JPanel cipherModePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        cipherModePanel.add(new JLabel("Cipher Mode:"));
+        
+        cipherModeComboBox = new JComboBox<>(new String[]{"ECB", "CBC", "CTR", "GCM"});
+        cipherModeComboBox.setSelectedItem("CBC"); // Default to CBC for better security
+        cipherModePanel.add(cipherModeComboBox);
+        JButton cipherHelpButton = new JButton("?");
+        cipherHelpButton.setMargin(new Insets(0, 5, 0, 5));
+        cipherHelpButton.addActionListener(e -> showHelp("Cipher Mode", 
+            "ECB - Electronic Codebook: Simple but less secure\n" +
+            "CBC - Cipher Block Chaining: More secure, requires IV\n" +
+            "CTR - Counter: Good for parallelization, requires IV\n" +
+            "GCM - Galois/Counter Mode: Authenticated encryption, requires IV"));
+        cipherModePanel.add(cipherHelpButton);
+        
+        // Padding
+        JPanel paddingPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        paddingPanel.add(new JLabel("Padding:"));
+        
+        paddingComboBox = new JComboBox<>(new String[]{"PKCS5Padding", "NoPadding"});
+        paddingPanel.add(paddingComboBox);
+        JButton paddingHelpButton = new JButton("?");
+        paddingHelpButton.setMargin(new Insets(0, 5, 0, 5));
+        paddingHelpButton.addActionListener(e -> showHelp("Padding", 
+            "PKCS5Padding - Standard padding scheme\n" +
+            "NoPadding - No padding (data must be multiple of block size)"));
+        paddingPanel.add(paddingHelpButton);
+        
+        // IV
+        JPanel ivPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        ivPanel.add(new JLabel("IV:"));
+        
+        ivTextField = new JTextField(16);
+        ivPanel.add(ivTextField);
+        
+        generateIvButton = new JButton("Generate IV");
+        generateIvButton.addActionListener(e -> {
+            try {
+                byte[] iv = EncryptionService.generateIV();
+                // Convert to a 16-char string for display
+                ivString = Base64.getEncoder().encodeToString(iv);
+                ivTextField.setText(ivString);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, 
+                    "Error generating IV: " + ex.getMessage(), 
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        ivPanel.add(generateIvButton);
+        
+        JButton ivHelpButton = new JButton("?");
+        ivHelpButton.setMargin(new Insets(0, 5, 0, 5));
+        ivHelpButton.addActionListener(e -> showHelp("Initialization Vector", 
+            "IV is required for CBC, CTR, and GCM modes.\n" +
+            "It should be 16 bytes (characters) long and unique for each encryption."));
+        ivPanel.add(ivHelpButton);
+        
+        // Key Size
+        JPanel keySizePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        keySizePanel.add(new JLabel("Key Size:"));
+        
+        keySizeComboBox = new JComboBox<>(new String[]{"128", "192", "256"});
+        keySizePanel.add(keySizeComboBox);
+        JButton keySizeHelpButton = new JButton("?");
+        keySizeHelpButton.setMargin(new Insets(0, 5, 0, 5));
+        keySizeHelpButton.addActionListener(e -> showHelp("Key Size", 
+            "Larger keys provide more security but may be slower.\n" +
+            "128 - Standard AES key size\n" +
+            "192 - Increased security\n" +
+            "256 - Maximum security"));
+        keySizePanel.add(keySizeHelpButton);
+        
+        // Secret Key
+        JPanel secretKeyPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        secretKeyPanel.add(new JLabel("Secret Key:"));
+        
+        secretKeyField = new JPasswordField(16);
+        secretKeyPanel.add(secretKeyField);
+        
+        generateKeyButton = new JButton("Generate Key");
+        generateKeyButton.addActionListener(e -> {
+            try {
+                int keySize = Integer.parseInt((String) keySizeComboBox.getSelectedItem());
+                key = EncryptionService.generateKey(keySize);
+                secretKeyField.setText(key);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, 
+                    "Error generating key: " + ex.getMessage(), 
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        secretKeyPanel.add(generateKeyButton);
+        
+        JButton keyHelpButton = new JButton("?");
+        keyHelpButton.setMargin(new Insets(0, 5, 0, 5));
+        keyHelpButton.addActionListener(e -> showHelp("Secret Key", 
+            "The secret key should be kept private.\n" +
+            "It must be the same for encryption and decryption."));
+        secretKeyPanel.add(keyHelpButton);
+        
+        // Output Format
+        JPanel outputFormatPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        outputFormatPanel.add(new JLabel("Output Format:"));
+        
+        ButtonGroup formatGroup = new ButtonGroup();
+        base64RadioButton = new JRadioButton("Base64", true);
+        hexRadioButton = new JRadioButton("Hex");
+        
+        formatGroup.add(base64RadioButton);
+        formatGroup.add(hexRadioButton);
+        
+        outputFormatPanel.add(base64RadioButton);
+        outputFormatPanel.add(hexRadioButton);
+        
+        JButton formatHelpButton = new JButton("?");
+        formatHelpButton.setMargin(new Insets(0, 5, 0, 5));
+        formatHelpButton.addActionListener(e -> showHelp("Output Format", 
+            "Base64 - Compact representation using 64 characters\n" +
+            "Hex - Hexadecimal representation (longer but only uses 0-9, A-F)"));
+        outputFormatPanel.add(formatHelpButton);
+        
+        // Add all option panels to right panel
+        rightPanel.add(cipherModePanel);
+        rightPanel.add(paddingPanel);
+        rightPanel.add(ivPanel);
+        rightPanel.add(keySizePanel);
+        rightPanel.add(secretKeyPanel);
+        rightPanel.add(outputFormatPanel);
+        
+        // Operation Buttons
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        
+        JButton encryptButton = new JButton("Encrypt");
+        encryptButton.addActionListener(e -> {
+            // controller.handleActualFileEncrypt(selectedFile,cipherModeComboBox,paddingComboBox,ivString,keySizeComboBox,key,formatGroup)
+            try {
+                if (inputTextArea.getText() == null) {
+                    JOptionPane.showMessageDialog(null, "No Text found for Encryption!", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                String encryptedTextContent = controller.handleActualTextEncrypt(inputTextArea,cipherModeComboBox,paddingComboBox,ivString,keySizeComboBox,key,formatGroup);
+        
+                // Display the encrypted content in the text area
+                outputTextArea.setText(encryptedTextContent);
+                outputTextArea.setEditable(false);
+        
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, "Error reading encrypted file: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        
+        JButton clearButton = new JButton("Clear");
+        clearButton.addActionListener(e -> {
+            // inputTextArea.setText("");
+            // outputTextArea.setText("");
+            ivTextField.setText("");
+            secretKeyField.setText("");
+        });
+
+        // Progress Bar
+        operationProgressBar = new JProgressBar();
+        operationProgressBar.setStringPainted(true);
+        operationProgressBar.setString("Ready");
+        
+        buttonPanel.add(encryptButton);
+        buttonPanel.add(clearButton);
+        // Main layout
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        
+        JPanel centerRightPanel = new JPanel(new BorderLayout());
+        centerRightPanel.add(centerPanel, BorderLayout.CENTER);
+        centerRightPanel.add(rightPanel, BorderLayout.EAST);
+        
+        contentPanel.add(centerRightPanel, BorderLayout.CENTER);
+        
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.add(buttonPanel, BorderLayout.NORTH);
+        bottomPanel.add(operationProgressBar, BorderLayout.SOUTH);
+        
+        contentPanel.add(bottomPanel, BorderLayout.SOUTH);
+        
+        return contentPanel;
+    }
+
+    private void saveEncryptionDetails(File file,JComboBox<String> cipherModeComboBox,JComboBox<String> paddingComboBox,String ivString,JComboBox<String> keySizeComboBox,String key,ButtonGroup formatGroup) throws IOException {
+        StringBuilder details = new StringBuilder();
+        details.append("Encryption Details\n");
+        details.append("==================\n");
+        details.append("Algorithm: ").append("AES/").append("\n");
+        details.append("Cipher Mode: ").append(cipherModeComboBox.getSelectedItem().toString()).append("\n");
+        details.append("Padding: ").append(paddingComboBox.getSelectedItem().toString()).append("\n");
+        if (ivString != null) {
+            details.append("IV (Base64): ").append(ivString).append("\n");
+        } else {
+            details.append("IV: Not used (ECB Mode)\n");
+        }
+        details.append("Key Size : ").append(Integer.parseInt(keySizeComboBox.getSelectedItem().toString())).append("\n");
+        details.append("Key : ").append(key).append("\n");
+        String selectedFormat = getSelectedButtonText(formatGroup);
+        details.append("Format Group (Base64)/Hex: ").append(selectedFormat).append("\n");
+        
+        Files.write(file.toPath(), details.toString().getBytes(StandardCharsets.UTF_8));
+    }
+
+    private String getSelectedButtonText(ButtonGroup buttonGroup) {
+        for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements();) {
+            AbstractButton button = buttons.nextElement();
+            if (button.isSelected()) {
+                return button.getText();  // Return the selected radio button's text
+            }
+        }
+        return "Unknown"; // Default if no button is selected (shouldn't happen)
+    }
+    
     private String readEncryptedFile(File file) throws IOException {
         byte[] fileBytes = Files.readAllBytes(file.toPath());
         return Base64.getEncoder().encodeToString(fileBytes);

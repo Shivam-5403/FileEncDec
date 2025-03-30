@@ -70,6 +70,29 @@ public class HomeController {
         }
     }
 
+    public void handleTextEncrypt(ActionEvent e){
+        JPanel EncTextPanel = homeView.TextEncryptionView();
+        homeView.setMainPanelContent(EncTextPanel);
+        homeView.updateStatus("Encrypting: Manual Text");
+    }
+
+    public String handleActualTextEncrypt(JTextArea inputTextArea,JComboBox<String> cipherModeComboBox,JComboBox<String> paddingComboBox,String ivString,JComboBox<String> keySizeComboBox,String key,ButtonGroup formatGroup){
+        byte[] decodedData = Base64.getDecoder().decode(ivString);
+        EncryptionModel actualText = new EncryptionModel(inputTextArea.getText(),key,cipherModeComboBox.getSelectedItem().toString(),paddingComboBox.getSelectedItem().toString(),decodedData,Integer.parseInt(keySizeComboBox.getSelectedItem().toString()),formatGroup.getSelection().toString());
+        String done = "";
+        if (actualText != null){ 
+            homeView.updateStatus("Text Object Has been Created");
+        }
+        try{
+            done = EncryptionService.encryptText(actualText);
+        }catch(Exception e){
+            homeView.updateStatus(e.toString()+" while handle Actual Text");
+        }
+        if (done != null){
+            homeView.updateStatus("Your Text has been encrypted.");
+        }
+        return done;
+    }
 
     public void handleDecrypt(ActionEvent e) {
         // homeView.updateStatus("Decrypting File...");

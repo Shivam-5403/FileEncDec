@@ -9,11 +9,14 @@ import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Base64;
 import java.util.Enumeration;
 import java.util.Scanner;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 
 public class HomeView extends JFrame {
     private HomeController controller;
@@ -229,7 +232,25 @@ public class HomeView extends JFrame {
         
         ivTextField = new JTextField(16);
         ivPanel.add(ivTextField);
-        
+        ivTextField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                String ivText = ivTextField.getText().trim(); // Trim whitespace
+                System.out.println("Focus Lost Event Triggered"); // Debugging step
+
+                if (ivText.length() != 16) {
+                    JOptionPane.showMessageDialog(ivTextField, 
+                        "IV must be exactly 16 characters long!", 
+                        "Invalid IV", JOptionPane.ERROR_MESSAGE);
+                    ivTextField.requestFocus(); // Bring focus back
+                }else{
+                    byte[] temp = ivTextField.getText().getBytes();
+                    System.out.println(java.util.Arrays.toString(temp));
+                    ivString = Base64.getEncoder().encodeToString(temp);
+                }
+            }
+        });
+
         generateIvButton = new JButton("Generate IV");
         generateIvButton.addActionListener(e -> {
             try {
@@ -262,9 +283,9 @@ public class HomeView extends JFrame {
         keySizeHelpButton.setMargin(new Insets(0, 5, 0, 5));
         keySizeHelpButton.addActionListener(e -> showHelp("Key Size", 
             "Larger keys provide more security but may be slower.\n" +
-            "128 - Standard AES key size\n" +
-            "192 - Increased security\n" +
-            "256 - Maximum security"));
+            "128 - Standard AES key size (16 chars)\n" +
+            "192 - Increased security (24 chars)\n" +
+            "256 - Maximum security (32 chars)"));
         keySizePanel.add(keySizeHelpButton);
         
         // Secret Key
@@ -273,7 +294,36 @@ public class HomeView extends JFrame {
         
         secretKeyField = new JPasswordField(16);
         secretKeyPanel.add(secretKeyField);
-        
+
+        keySizeComboBox.addActionListener(e -> {
+            int selectedSize = Integer.parseInt((String) keySizeComboBox.getSelectedItem());
+            int requiredLength = selectedSize / 8; // 128 -> 16, 192 -> 24, 256 -> 32
+            secretKeyField.setColumns(requiredLength);
+            secretKeyField.setText(""); // Clear the field when size changes
+        });
+
+        // Add Focus Listener to Validate Key Length
+        secretKeyField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                int selectedSize = Integer.parseInt((String) keySizeComboBox.getSelectedItem());
+                int requiredLength = selectedSize / 8;
+                String keyText = new String(secretKeyField.getPassword()).trim();
+
+                if (keyText.length() != requiredLength) {
+                    JOptionPane.showMessageDialog(secretKeyField, 
+                        "Key must be exactly " + requiredLength + " characters long!", 
+                        "Invalid Key Length", JOptionPane.ERROR_MESSAGE);
+                    secretKeyField.requestFocus();
+                }else{
+                    char[] a = secretKeyField.getPassword();
+                    String s = String.valueOf(a);
+                    byte[] t = s.getBytes();
+                    key = Base64.getEncoder().encodeToString(t);
+                }
+            }
+        });
+
         generateKeyButton = new JButton("Generate Key");
         generateKeyButton.addActionListener(e -> {
             try {
@@ -492,7 +542,25 @@ public class HomeView extends JFrame {
         
         ivTextField = new JTextField(16);
         ivPanel.add(ivTextField);
-        
+        ivTextField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                String ivText = ivTextField.getText().trim(); // Trim whitespace
+                System.out.println("Focus Lost Event Triggered"); // Debugging step
+
+                if (ivText.length() != 16) {
+                    JOptionPane.showMessageDialog(ivTextField, 
+                        "IV must be exactly 16 characters long!", 
+                        "Invalid IV", JOptionPane.ERROR_MESSAGE);
+                    ivTextField.requestFocus(); // Bring focus back
+                }else{
+                    byte[] temp = ivTextField.getText().getBytes();
+                    System.out.println(java.util.Arrays.toString(temp));
+                    ivString = Base64.getEncoder().encodeToString(temp);
+                }
+            }
+        });
+
         generateIvButton = new JButton("Generate IV");
         generateIvButton.addActionListener(e -> {
             try {
@@ -525,9 +593,9 @@ public class HomeView extends JFrame {
         keySizeHelpButton.setMargin(new Insets(0, 5, 0, 5));
         keySizeHelpButton.addActionListener(e -> showHelp("Key Size", 
             "Larger keys provide more security but may be slower.\n" +
-            "128 - Standard AES key size\n" +
-            "192 - Increased security\n" +
-            "256 - Maximum security"));
+            "128 - Standard AES key size (16 chars)\n" +
+            "192 - Increased security (24 chars)\n" +
+            "256 - Maximum security (32 chars)"));
         keySizePanel.add(keySizeHelpButton);
         
         // Secret Key
@@ -537,6 +605,35 @@ public class HomeView extends JFrame {
         secretKeyField = new JPasswordField(16);
         secretKeyPanel.add(secretKeyField);
         
+        keySizeComboBox.addActionListener(e -> {
+            int selectedSize = Integer.parseInt((String) keySizeComboBox.getSelectedItem());
+            int requiredLength = selectedSize / 8; // 128 -> 16, 192 -> 24, 256 -> 32
+            secretKeyField.setColumns(requiredLength);
+            secretKeyField.setText(""); // Clear the field when size changes
+        });
+
+        // Add Focus Listener to Validate Key Length
+        secretKeyField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                int selectedSize = Integer.parseInt((String) keySizeComboBox.getSelectedItem());
+                int requiredLength = selectedSize / 8;
+                String keyText = new String(secretKeyField.getPassword()).trim();
+
+                if (keyText.length() != requiredLength) {
+                    JOptionPane.showMessageDialog(secretKeyField, 
+                        "Key must be exactly " + requiredLength + " characters long!", 
+                        "Invalid Key Length", JOptionPane.ERROR_MESSAGE);
+                    secretKeyField.requestFocus();
+                }else{
+                    char[] a = secretKeyField.getPassword();
+                    String s = String.valueOf(a);
+                    byte[] t = s.getBytes();
+                    key = Base64.getEncoder().encodeToString(t);
+                }
+            }
+        });
+
         generateKeyButton = new JButton("Generate Key");
         generateKeyButton.addActionListener(e -> {
             try {

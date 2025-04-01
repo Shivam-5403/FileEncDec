@@ -27,20 +27,22 @@ public class EncryptionModel {
         this.outputFormat = outputFormat; // Default output format
         this.iv = iv;
     }
-    
-    // 🔹 Constructor for file decryption 
-    public EncryptionModel(String filePath, String encryptionKey, String cipherMode, 
-                           String padding, int keySize) {
-        this.filePath = filePath;
-        this.encryptionKey = encryptionKey;
-        this.cipherMode = cipherMode;
-        this.padding = padding;
-        this.keySize = keySize;
-    }
+
+    // // 🔹 Constructor for file decryption
+    // public EncryptionModel(String filePath, String encryptionKey, String cipherMode, 
+    //                     String padding, int keySize,String outputFormat, byte[] iv) {
+    //     this.filePath = filePath;
+    //     this.encryptionKey = encryptionKey;
+    //     this.cipherMode = cipherMode; // Default mode
+    //     this.padding = padding; // Default padding
+    //     this.keySize = keySize; // Default key size
+    //     this.outputFormat = outputFormat; // Default output format
+    //     this.iv = iv;
+    // }
 
     // 🔹 Constructor for text encryption
     public EncryptionModel(String plainText, String encryptionKey, String cipherMode, 
-                           String padding, byte[] iv, int keySize, String outputFormat) {
+                        String padding, byte[] iv, int keySize, String outputFormat) {
         this.plainText = plainText;
         this.encryptionKey = encryptionKey;
         this.cipherMode = cipherMode;
@@ -49,17 +51,18 @@ public class EncryptionModel {
         this.keySize = keySize;
         this.outputFormat = outputFormat;
     }
-    
-    // 🔹 Constructor for text decryption
-    public EncryptionModel(String encryptedText, String encryptionKey, String cipherMode, 
-                           String padding, int keySize, String outputFormat) {
-        this.encryptedText = encryptedText;
-        this.encryptionKey = encryptionKey;
-        this.cipherMode = cipherMode;
-        this.padding = padding;
-        this.keySize = keySize;
-        this.outputFormat = outputFormat;
-    }
+
+    // // 🔹 Constructor for text decryption
+    // public EncryptionModel(String encryptedText, String encryptionKey, String cipherMode, 
+    //                     String padding, byte[] iv, int keySize, String outputFormat) {
+    //     this.encryptedText = encryptedText;
+    //     this.encryptionKey = encryptionKey;
+    //     this.cipherMode = cipherMode;
+    //     this.padding = padding;
+    //     this.iv = iv;
+    //     this.keySize = keySize;
+    //     this.outputFormat = outputFormat;
+    // }
 
     public EncryptionModel(String filePath, String password, byte[] salt, byte[] iv, String cipherMode) {
         this.filePath = filePath;
@@ -69,12 +72,11 @@ public class EncryptionModel {
         this.cipherMode = cipherMode;
     }
 
-
     // 🔹 Getters and Setters
     public String getFilePath() {
         return filePath;
     }
-    
+
     public void setFilePath(String filePath) {
         this.filePath = filePath;
     }
@@ -82,11 +84,11 @@ public class EncryptionModel {
     public String getEncryptionKey() {
         return encryptionKey;
     }
-    
+
     public void setEncryptionKey(String encryptionKey) {
         this.encryptionKey = encryptionKey;
     }
-    
+
     public String getPassword() {
         return password;
     }
@@ -106,55 +108,55 @@ public class EncryptionModel {
     public String getCipherMode() {
         return cipherMode;
     }
-    
+
     public void setCipherMode(String cipherMode) {
         this.cipherMode = cipherMode;
     }
-    
+
     public String getPadding() {
         return padding;
     }
-    
+
     public void setPadding(String padding) {
         this.padding = padding;
     }
-    
+
     public byte[] getIv() {
         return iv;
     }
-    
+
     public void setIv(byte[] iv) {
         this.iv = iv;
     }
-    
+
     public int getKeySize() {
         return keySize;
     }
-    
+
     public void setKeySize(int keySize) {
         this.keySize = keySize;
     }
-    
+
     public String getOutputFormat() {
         return outputFormat;
     }
-    
+
     public void setOutputFormat(String outputFormat) {
         this.outputFormat = outputFormat;
     }
-    
+
     public String getPlainText() {
         return plainText;
     }
-    
+
     public void setPlainText(String plainText) {
         this.plainText = plainText;
     }
-    
+
     public String getEncryptedText() {
         return encryptedText;
     }
-    
+
     public void setEncryptedText(String encryptedText) {
         this.encryptedText = encryptedText;
     }

@@ -853,37 +853,37 @@ public class HomeView extends JFrame {
             "NoPadding - No padding (data must be multiple of block size)"));
         paddingPanel.add(paddingHelpButton);
         
-        // // IV
-        // JPanel ivPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        // ivPanel.add(new JLabel("IV:"));
+        // IV
+        JPanel ivPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        ivPanel.add(new JLabel("IV:"));
         
-        // ivTextField = new JTextField(16);
-        // ivPanel.add(ivTextField);
-        // ivTextField.addFocusListener(new FocusAdapter() {
-        //     @Override
-        //     public void focusLost(FocusEvent e) {
-        //         String ivText = ivTextField.getText().trim(); // Trim whitespace
-        //         System.out.println("Focus Lost Event Triggered"); // Debugging step
+        ivTextField = new JTextField(16);
+        ivPanel.add(ivTextField);
+        ivTextField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                String ivText = ivTextField.getText().trim(); // Trim whitespace
+                System.out.println("Focus Lost Event Triggered"); // Debugging step
 
-        //         if (ivText.length() != 16) {
-        //             JOptionPane.showMessageDialog(ivTextField, 
-        //                 "IV must be exactly 16 characters long!", 
-        //                 "Invalid IV", JOptionPane.ERROR_MESSAGE);
-        //             ivTextField.requestFocus(); // Bring focus back
-        //         }else{
-        //             byte[] temp = ivTextField.getText().getBytes();
-        //             System.out.println(java.util.Arrays.toString(temp));
-        //             ivString = Base64.getEncoder().encodeToString(temp);
-        //         }
-        //     }
-        // });
+                if (ivText.length() != 16) {
+                    JOptionPane.showMessageDialog(ivTextField, 
+                        "IV must be exactly 16 characters long!", 
+                        "Invalid IV", JOptionPane.ERROR_MESSAGE);
+                    ivTextField.requestFocus(); // Bring focus back
+                }else{
+                    byte[] temp = ivTextField.getText().getBytes();
+                    System.out.println(java.util.Arrays.toString(temp));
+                    ivString = Base64.getEncoder().encodeToString(temp);
+                }
+            }
+        });
         
-        // JButton ivHelpButton = new JButton("?");
-        // ivHelpButton.setMargin(new Insets(0, 5, 0, 5));
-        // ivHelpButton.addActionListener(e -> showHelp("Initialization Vector", 
-        //     "IV is required for CBC, CTR, and GCM modes.\n" +
-        //     "It should be 16 bytes (characters) long and unique for each encryption."));
-        // ivPanel.add(ivHelpButton);
+        JButton ivHelpButton = new JButton("?");
+        ivHelpButton.setMargin(new Insets(0, 5, 0, 5));
+        ivHelpButton.addActionListener(e -> showHelp("Initialization Vector", 
+            "IV is required for CBC, CTR, and GCM modes.\n" +
+            "It should be 16 bytes (characters) long and unique for each encryption."));
+        ivPanel.add(ivHelpButton);
         
         // Key Size
         JPanel keySizePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -943,40 +943,40 @@ public class HomeView extends JFrame {
             "It must be the same for encryption and decryption."));
         secretKeyPanel.add(keyHelpButton);
         
-        // // Output Format
-        // JPanel outputFormatPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        // outputFormatPanel.add(new JLabel("Output Format:"));
+        // Output Format
+        JPanel outputFormatPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        outputFormatPanel.add(new JLabel("Output Format:"));
         
-        // ButtonGroup formatGroup = new ButtonGroup();
-        // base64RadioButton = new JRadioButton("Base64", true);
-        // hexRadioButton = new JRadioButton("Hex");
+        ButtonGroup formatGroup = new ButtonGroup();
+        base64RadioButton = new JRadioButton("Base64", true);
+        hexRadioButton = new JRadioButton("Hex");
         
-        // formatGroup.add(base64RadioButton);
-        // formatGroup.add(hexRadioButton);
+        formatGroup.add(base64RadioButton);
+        formatGroup.add(hexRadioButton);
         
-        // outputFormatPanel.add(base64RadioButton);
-        // outputFormatPanel.add(hexRadioButton);
+        outputFormatPanel.add(base64RadioButton);
+        outputFormatPanel.add(hexRadioButton);
         
-        // JButton formatHelpButton = new JButton("?");
-        // formatHelpButton.setMargin(new Insets(0, 5, 0, 5));
-        // formatHelpButton.addActionListener(e -> showHelp("Output Format", 
-        //     "Base64 - Compact representation using 64 characters\n" +
-        //     "Hex - Hexadecimal representation (longer but only uses 0-9, A-F)"));
-        // outputFormatPanel.add(formatHelpButton);
+        JButton formatHelpButton = new JButton("?");
+        formatHelpButton.setMargin(new Insets(0, 5, 0, 5));
+        formatHelpButton.addActionListener(e -> showHelp("Output Format", 
+            "Base64 - Compact representation using 64 characters\n" +
+            "Hex - Hexadecimal representation (longer but only uses 0-9, A-F)"));
+        outputFormatPanel.add(formatHelpButton);
         
         // Add all option panels to right panel
         rightPanel.add(cipherModePanel);
         rightPanel.add(paddingPanel);
-        // rightPanel.add(ivPanel);
+        rightPanel.add(ivPanel);
         rightPanel.add(keySizePanel);
         rightPanel.add(secretKeyPanel);
-        // rightPanel.add(outputFormatPanel);
+        rightPanel.add(outputFormatPanel);
         
         // Operation Buttons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         
         JButton encryptButton = new JButton("Decrypt");
-        encryptButton.addActionListener(e -> controller.handleActualFileDecrypt(selectedFile,cipherModeComboBox,paddingComboBox,keySizeComboBox,key));
+        encryptButton.addActionListener(e -> controller.handleActualFileDecrypt(selectedFile,cipherModeComboBox,paddingComboBox,ivString,keySizeComboBox,key,formatGroup));
         
         JButton clearButton = new JButton("Clear");
         clearButton.addActionListener(e -> {
@@ -1142,37 +1142,37 @@ public class HomeView extends JFrame {
                         "NoPadding - No padding (data must be multiple of block size)"));
         paddingPanel.add(paddingHelpButton);
 
-        // // IV
-        // JPanel ivPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        // ivPanel.add(new JLabel("IV:"));
+        // IV
+        JPanel ivPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        ivPanel.add(new JLabel("IV:"));
 
-        // ivTextField = new JTextField(16);
-        // ivPanel.add(ivTextField);
-        // ivTextField.addFocusListener(new FocusAdapter() {
-        //     @Override
-        //     public void focusLost(FocusEvent e) {
-        //         String ivText = ivTextField.getText().trim(); // Trim whitespace
-        //         System.out.println("Focus Lost Event Triggered"); // Debugging step
+        ivTextField = new JTextField(16);
+        ivPanel.add(ivTextField);
+        ivTextField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                String ivText = ivTextField.getText().trim(); // Trim whitespace
+                System.out.println("Focus Lost Event Triggered"); // Debugging step
 
-        //         if (ivText.length() != 16) {
-        //             JOptionPane.showMessageDialog(ivTextField,
-        //                     "IV must be exactly 16 characters long!",
-        //                     "Invalid IV", JOptionPane.ERROR_MESSAGE);
-        //             ivTextField.requestFocus(); // Bring focus back
-        //         } else {
-        //             byte[] temp = ivTextField.getText().getBytes();
-        //             System.out.println(java.util.Arrays.toString(temp));
-        //             ivString = Base64.getEncoder().encodeToString(temp);
-        //         }
-        //     }
-        // });
+                if (ivText.length() != 16) {
+                    JOptionPane.showMessageDialog(ivTextField,
+                            "IV must be exactly 16 characters long!",
+                            "Invalid IV", JOptionPane.ERROR_MESSAGE);
+                    ivTextField.requestFocus(); // Bring focus back
+                } else {
+                    byte[] temp = ivTextField.getText().getBytes();
+                    System.out.println(java.util.Arrays.toString(temp));
+                    ivString = Base64.getEncoder().encodeToString(temp);
+                }
+            }
+        });
 
-        // JButton ivHelpButton = new JButton("?");
-        // ivHelpButton.setMargin(new Insets(0, 5, 0, 5));
-        // ivHelpButton.addActionListener(e -> showHelp("Initialization Vector",
-        //         "IV is required for CBC, CTR, and GCM modes.\n" +
-        //                 "It should be 16 bytes (characters) long and unique for each encryption."));
-        // ivPanel.add(ivHelpButton);
+        JButton ivHelpButton = new JButton("?");
+        ivHelpButton.setMargin(new Insets(0, 5, 0, 5));
+        ivHelpButton.addActionListener(e -> showHelp("Initialization Vector",
+                "IV is required for CBC, CTR, and GCM modes.\n" +
+                        "It should be 16 bytes (characters) long and unique for each encryption."));
+        ivPanel.add(ivHelpButton);
 
         // Key Size
         JPanel keySizePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -1275,7 +1275,7 @@ public class HomeView extends JFrame {
                 }
 
                 String decryptedTextContent = controller.handleActualTextDecrypt(inputTextArea, cipherModeComboBox,
-                        paddingComboBox, keySizeComboBox, key, formatGroup);
+                        paddingComboBox,ivString, keySizeComboBox, key, formatGroup);
 
                 // Display the encrypted content in the text area
                 outputTextArea.setText(decryptedTextContent);

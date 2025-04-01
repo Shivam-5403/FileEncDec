@@ -32,7 +32,7 @@ public class EncryptionService {
         File outputFile = new File(model.getFilePath() + ".encrypted");
 
         try (FileInputStream inputStream = new FileInputStream(inputFile);
-             FileOutputStream outputStream = new FileOutputStream(outputFile)) {
+            FileOutputStream outputStream = new FileOutputStream(outputFile)) {
 
             // Compute file integrity hash
             byte[] fileHash = computeFileHash(inputFile);
@@ -84,7 +84,7 @@ public class EncryptionService {
         }
 
         try (FileInputStream inputStream = new FileInputStream(inputFile);
-             FileOutputStream outputStream = new FileOutputStream(outputFile)) {
+            FileOutputStream outputStream = new FileOutputStream(outputFile)) {
 
             // Read IV from the beginning of the file (except for ECB mode)
             byte[] iv = null;
@@ -98,11 +98,11 @@ public class EncryptionService {
             }
 
              // Read the stored file integrity hash
-             byte[] storedFileHash = new byte[32]; // SHA-256 produces a 32-byte hash
-             int bytesRead = inputStream.read(storedFileHash);
-             if (bytesRead != 32) {
-                 throw new Exception("Corrupt encrypted file: Missing integrity hash.");
-             }
+            byte[] storedFileHash = new byte[32]; // SHA-256 produces a 32-byte hash
+            int bytesRead = inputStream.read(storedFileHash);
+            if (bytesRead != 32) {
+                throw new Exception("Corrupt encrypted file: Missing integrity hash.");
+            }
 
             // Get cipher instance and initialize
             Cipher cipher = getCipher(model, Cipher.DECRYPT_MODE);
@@ -227,7 +227,7 @@ public class EncryptionService {
     private static byte[] computeFileHash(File file) throws IOException, NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         try (FileInputStream fis = new FileInputStream(file);
-             BufferedInputStream bis = new BufferedInputStream(fis)) {
+            BufferedInputStream bis = new BufferedInputStream(fis)) {
             byte[] buffer = new byte[4096];
             int bytesRead;
             while ((bytesRead = bis.read(buffer)) != -1) {

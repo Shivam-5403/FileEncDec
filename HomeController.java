@@ -44,13 +44,12 @@ public class HomeController {
         if (selectedFile == null) {
             homeView.showMessage("Please select a file first!");
             return;
-        }
-        else{
+        } else {
             JPanel EncPanel = homeView.EncryptionView(selectedFile);
-            
+
             homeView.setMainPanelContent(EncPanel);
         }
-        homeView.updateStatus("Encrypting: " + selectedFile.getName());   
+        homeView.updateStatus("Encrypting: " + selectedFile.getName());
     }
 
     public void handleFileDecrypt(ActionEvent e) {
@@ -68,30 +67,37 @@ public class HomeController {
         }
         homeView.updateStatus("Decrypting: " + selectedFile.getName());
     }
-    
-    public void handleActualFileEncrypt(File selectedFile,JComboBox<String> cipherModeComboBox,JComboBox<String> paddingComboBox,String ivString,JComboBox<String> keySizeComboBox,String key,ButtonGroup formatGroup){
+
+    public void handleActualFileEncrypt(File selectedFile, JComboBox<String> cipherModeComboBox,
+            JComboBox<String> paddingComboBox, String ivString, JComboBox<String> keySizeComboBox, String key,
+            ButtonGroup formatGroup) {
         byte[] decodedData = Base64.getDecoder().decode(ivString);
-        EncryptionModel actualFile = new EncryptionModel(selectedFile.getPath(),key,cipherModeComboBox.getSelectedItem().toString(),paddingComboBox.getSelectedItem().toString(),Integer.parseInt(keySizeComboBox.getSelectedItem().toString()),formatGroup.getSelection().toString(),decodedData);
+        EncryptionModel actualFile = new EncryptionModel(selectedFile.getPath(), key,
+                cipherModeComboBox.getSelectedItem().toString(), paddingComboBox.getSelectedItem().toString(),
+                Integer.parseInt(keySizeComboBox.getSelectedItem().toString()), formatGroup.getSelection().toString(),
+                decodedData);
         boolean done = false;
-        if (actualFile != null){ 
+        if (actualFile != null) {
             homeView.updateStatus("File Object Has been Created");
         }
-        try{
+        try {
             done = EncryptionService.encryptFile(actualFile);
-        }catch(Exception e){
-            homeView.updateStatus(e.toString()+"handle Actual");
+        } catch (Exception e) {
+            homeView.updateStatus(e.toString() + "handle Actual");
         }
-        if (done == true){
+        if (done == true) {
             homeView.updateStatus("Your File has been Encrypted.");
         }
     }
-    
+
     public void handleActualFileDecrypt(File selectedFile, JComboBox<String> cipherModeComboBox,
-            JComboBox<String> paddingComboBox, JComboBox<String> keySizeComboBox, String key) {
-        // byte[] decodedData = Base64.getDecoder().decode(ivString);
+            JComboBox<String> paddingComboBox, String ivString, JComboBox<String> keySizeComboBox, String key,
+            ButtonGroup formatGroup) {
+        byte[] decodedData = Base64.getDecoder().decode(ivString);
         EncryptionModel actualFile = new EncryptionModel(selectedFile.getPath(), key,
                 cipherModeComboBox.getSelectedItem().toString(), paddingComboBox.getSelectedItem().toString(),
-                Integer.parseInt(keySizeComboBox.getSelectedItem().toString()));
+                Integer.parseInt(keySizeComboBox.getSelectedItem().toString()), formatGroup.getSelection().toString(),
+                decodedData);
         boolean done = false;
         if (actualFile != null) {
             homeView.updateStatus("File Object Has been Created");
@@ -106,55 +112,62 @@ public class HomeController {
         }
     }
 
-    public void handleTextEncrypt(ActionEvent e){
+    public void handleTextEncrypt(ActionEvent e) {
         JPanel EncTextPanel = homeView.TextEncryptionView();
         homeView.setMainPanelContent(EncTextPanel);
         homeView.updateStatus("Encrypting: Manual Text");
     }
-    
+
     public void handleTextDecrypt(ActionEvent e) {
         JPanel EncTextPanel = homeView.TextDecryptionView();
         homeView.setMainPanelContent(EncTextPanel);
         homeView.updateStatus("Decrypting: Manual Text");
     }
 
-    public String handleActualTextEncrypt(JTextArea inputTextArea,JComboBox<String> cipherModeComboBox,JComboBox<String> paddingComboBox,
-            String ivString,JComboBox<String> keySizeComboBox,String key,ButtonGroup formatGroup){
+    public String handleActualTextEncrypt(JTextArea inputTextArea, JComboBox<String> cipherModeComboBox,
+            JComboBox<String> paddingComboBox,
+            String ivString, JComboBox<String> keySizeComboBox, String key, ButtonGroup formatGroup) {
         byte[] decodedData = Base64.getDecoder().decode(ivString);
-        EncryptionModel actualText = new EncryptionModel(inputTextArea.getText(),key,cipherModeComboBox.getSelectedItem().toString(),paddingComboBox.getSelectedItem().toString(),decodedData,Integer.parseInt(keySizeComboBox.getSelectedItem().toString()),formatGroup.getSelection().toString());
+        EncryptionModel actualText = new EncryptionModel(inputTextArea.getText(), key,
+                cipherModeComboBox.getSelectedItem().toString(), paddingComboBox.getSelectedItem().toString(),
+                decodedData, Integer.parseInt(keySizeComboBox.getSelectedItem().toString()),
+                formatGroup.getSelection().toString());
         String done = "";
-        if (actualText != null){ 
+        if (actualText != null) {
             homeView.updateStatus("Text Object Has been Created");
         }
-        try{
+        try {
             done = EncryptionService.encryptText(actualText);
-        }catch(Exception e){
-            homeView.updateStatus(e.toString()+" while handle Actual Text");
+        } catch (Exception e) {
+            homeView.updateStatus(e.toString() + " while handle Actual Text");
         }
-        if (done != null){
+        if (done != null) {
             homeView.updateStatus("Your Text has been encrypted.");
         }
         return done;
     }
 
-    public String handleActualTextDecrypt(JTextArea inputTextArea,JComboBox<String> cipherModeComboBox,JComboBox<String> paddingComboBox,JComboBox<String> keySizeComboBox,String key,ButtonGroup formatGroup){
-        // byte[] decodedData = Base64.getDecoder().decode(ivString);
-        EncryptionModel actualText = new EncryptionModel(inputTextArea.getText(),key,cipherModeComboBox.getSelectedItem().toString(),paddingComboBox.getSelectedItem().toString(),Integer.parseInt(keySizeComboBox.getSelectedItem().toString()),formatGroup.getSelection().toString());
+    public String handleActualTextDecrypt(JTextArea inputTextArea, JComboBox<String> cipherModeComboBox,
+            JComboBox<String> paddingComboBox, String ivString, JComboBox<String> keySizeComboBox, String key,
+            ButtonGroup formatGroup) {
+        byte[] decodedData = Base64.getDecoder().decode(ivString);
+        EncryptionModel actualText = new EncryptionModel(inputTextArea.getText(), key,
+                cipherModeComboBox.getSelectedItem().toString(), paddingComboBox.getSelectedItem().toString(),decodedData,
+                Integer.parseInt(keySizeComboBox.getSelectedItem().toString()), formatGroup.getSelection().toString());
         String done = "";
-        if (actualText != null){ 
+        if (actualText != null) {
             homeView.updateStatus("Text Object Has been Created");
         }
-        try{
+        try {
             done = EncryptionService.decryptText(actualText);
-        }catch(Exception e){
-            homeView.updateStatus(e.toString()+" while handle Actual Text");
+        } catch (Exception e) {
+            homeView.updateStatus(e.toString() + " while handle Actual Text");
         }
-        if (!done.isEmpty()){
+        if (!done.isEmpty()) {
             homeView.updateStatus("Your Text has been decrypted.");
         }
         return done;
     }
-
 
     public void handleSettings(ActionEvent e) {
         homeView.updateStatus("Opening Settings...");

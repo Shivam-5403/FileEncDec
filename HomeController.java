@@ -60,9 +60,11 @@ public class HomeController {
         if (selectedFile == null) {
             homeView.showMessage("Please select a file first!");
             return;
+        } else if (!selectedFile.getName().endsWith(".encrypted")) {
+            homeView.showMessage("Selected file is not an encrypted file (.encrypted)!");
+            return;
         } else {
             JPanel DencPanel = homeView.DecryptionView(selectedFile);
-
             homeView.setMainPanelContent(DencPanel);
         }
         homeView.updateStatus("Decrypting: " + selectedFile.getName());
@@ -152,7 +154,8 @@ public class HomeController {
             ButtonGroup formatGroup) {
         byte[] decodedData = Base64.getDecoder().decode(ivString);
         EncryptionModel actualText = new EncryptionModel(inputTextArea.getText(), key,
-                cipherModeComboBox.getSelectedItem().toString(), paddingComboBox.getSelectedItem().toString(),decodedData,
+                cipherModeComboBox.getSelectedItem().toString(), paddingComboBox.getSelectedItem().toString(),
+                decodedData,
                 Integer.parseInt(keySizeComboBox.getSelectedItem().toString()), formatGroup.getSelection().toString());
         String done = "";
         if (actualText != null) {
@@ -194,8 +197,105 @@ public class HomeController {
 
     public void handleHelp(ActionEvent e) {
         homeView.updateStatus("Opening Help...");
+
+        // Create Help Panel
         JPanel helpPanel = new JPanel();
-        helpPanel.add(new JLabel("Help Section - Work in Progress"));
+        helpPanel.setLayout(new BorderLayout());
+
+        // Create a Text Area to Display Help Information
+        JTextArea helpText = new JTextArea();
+        helpText.setEditable(false);
+        helpText.setLineWrap(true);
+        helpText.setWrapStyleWord(true);
+
+        helpText.setText(
+                "HELP SECTION - Encryption & Decryption Guide\n\n"
+                        + "Introduction:\n"
+                        + "This application helps you securely encrypt and decrypt files and text using AES encryption.\n\n"
+
+                        + "How to Encrypt a File:\n"
+                        + "1. Select File Menu.\n"
+                        + "2. Click 'Open File' and choose a file.\n"
+                        + "3. Select Encryption menu.\n"
+                        + "4. To Encrypted File select Encrypt File Option.\n"
+                        + "5. Select Encryption Cipher mode (ECB,CBC,CTR,GCM).\n"
+                        + "6. Select Encryption Padding (PKCS5Padding , No Padding).\n"
+                        + "7. Enter IV For Cipher mode CBC,CTR and GCM Or Generate IV.\n"
+                        + "8. Select Secret Key Size (128->16,192->24,256->32).\n"
+                        + "9. Enter Secret Key Or Generate Secret key.\n"
+                        + "10. Select Output Format (Base64 , Hex).\n"
+                        + "11. Click On Encrypt Button File will be Encrypted and Stored.\n"
+                        + "12. Save Key details for Decryption.\n\n"
+
+                        + "How to Decrypt a File:\n"
+                        + "1. Select File Menu.\n"
+                        + "2. Click 'Open File' and choose an encrypted file.\n"
+                        + "3. Select Decryption menu.\n"
+                        + "4. To Decrypted File select Decrypt File Option.\n"
+                        + "5. Select Decryption Cipher mode (ECB,CBC,CTR,GCM).\n"
+                        + "6. Select Decryption Padding (PKCS5Padding , No Padding).\n"
+                        + "7. Enter IV For Cipher mode CBC,CTR and GCM Which use for Encryption..\n"
+                        + "8. Select Secret Key Size (128->16,192->24,256->32).\n"
+                        + "9. Enter Secret Key Which use for Encryption.\n"
+                        + "10. Select Output Format (Base64 , Hex).\n"
+                        + "11. Click On Decrypt Button File will be Encrypted and Stored.\n\n"
+
+                        + "How to Encrypt Text:\n"
+                        + "1. Select Encryption menu.\n"
+                        + "2. To Encrypted Text select Encrypt Text Option.\n"
+                        + "3. Type the text into the input box.\n"
+                        + "4. Select Encryption Cipher mode (ECB,CBC,CTR,GCM).\n"
+                        + "5. Select Encryption Padding (PKCS5Padding , No Padding).\n"
+                        + "6. Enter IV For Cipher mode CBC,CTR and GCM Or Generate IV.\n"
+                        + "7. Select Secret Key Size (128->16,192->24,256->32).\n"
+                        + "8. Enter Secret Key Or Generate Secret key.\n"
+                        + "9. Select Output Format (Base64 , Hex).\n"
+                        + "10. Click On Encrypt Button Text will be Encrypted and Display in Output box.\n"
+                        + "11. Save Key details for Decryption.\n\n"
+
+                        + "How to Decrypt Text:\n"
+                        + "1. Select Decryption menu.\n"
+                        + "2. To Decrypted Text select Decrypt Text Option.\n"
+                        + "3. Paste the encrypted text.\n"
+                        + "4. Select Decryption Cipher mode (ECB,CBC,CTR,GCM).\n"
+                        + "5. Select Decryption Padding (PKCS5Padding , No Padding).\n"
+                        + "6. Enter IV For Cipher mode CBC,CTR and GCM Which use for Encryption..\n"
+                        + "7. Select Secret Key Size (128->16,192->24,256->32).\n"
+                        + "8. Enter Secret Key Which use for Encryption.\n"
+                        + "9. Select Output Format (Base64 , Hex).\n"
+                        + "10. Click On Decrypt Button File will be Decrypted and Display in Output box.\n\n"
+
+                        + "Encryption Modes:\n"
+                        + "ECB - Electronic Codebook: Simple but less secure\n" 
+                        + "CBC - Cipher Block Chaining: More secure, requires IV\n" 
+                        + "CTR - Counter: Good for parallelization, requires IV\n" 
+                        + "GCM - Galois/Counter Mode: Authenticated encryption, requires IV\n\n"
+
+                        + "FAQs:\n"
+                        + "Why is my decrypted file unreadable?\n"
+                        + "Ensure the encryption key, mode, and padding are correct.\n"
+                        + "What if I lose my encryption key?\n"
+                        + "You cannot decrypt without the correct key.\n\n"
+
+                        + "Security Best Practices:\n"
+                        + "Use strong keys.\n"
+                        + "Larger keys provide more security but may be slower.\n"
+                        + " -> 128 - Standard AES key size (16 chars)\n" 
+                        + " -> 192 - Increased security (24 chars)\n" 
+                        + " -> 256 - Maximum security (32 chars)"
+                        + "Never share encryption keys over insecure channels.\n"
+                        + "Save your Encryption Configuration details File.\n"
+                        + "Backup your encrypted files.\n\n");
+
+        // Add the text area inside a scroll pane
+        JScrollPane scrollPane = new JScrollPane(helpText);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+        // Add components to the help panel
+        helpPanel.add(scrollPane, BorderLayout.CENTER);
+
+        // Set the panel content in the main window
         homeView.setMainPanelContent(helpPanel);
     }
+
 }

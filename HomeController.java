@@ -150,8 +150,8 @@ public class HomeController {
     }
 
     public String handleActualTextDecrypt(JTextArea inputTextArea, JComboBox<String> cipherModeComboBox,
-            JComboBox<String> paddingComboBox, String ivString, JComboBox<String> keySizeComboBox, String key,
-            ButtonGroup formatGroup) {
+            JComboBox<String> paddingComboBox,
+            String ivString, JComboBox<String> keySizeComboBox, String key, ButtonGroup formatGroup) {
         byte[] decodedData = Base64.getDecoder().decode(ivString);
         EncryptionModel actualText = new EncryptionModel(inputTextArea.getText(), key,
                 cipherModeComboBox.getSelectedItem().toString(), paddingComboBox.getSelectedItem().toString(),

@@ -1018,30 +1018,6 @@ public class HomeView extends JFrame {
             }
         });
 
-        JButton savekeyButton = new JButton("Save Key Details");
-        savekeyButton.addActionListener(e -> {
-            try {
-                // Prompt the user to select a save location
-                JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setDialogTitle("Save Decryption Details");
-                fileChooser.setSelectedFile(new File("Decryption_Details.txt"));
-                
-                int userSelection = fileChooser.showSaveDialog(null);
-                
-                if (userSelection == JFileChooser.APPROVE_OPTION) {
-                    File saveFile = fileChooser.getSelectedFile();
-                    
-                    // Write encryption details to file
-                    saveDecryptionDetails(saveFile,cipherModeComboBox,paddingComboBox,ivString,keySizeComboBox,key);
-                    
-                    JOptionPane.showMessageDialog(null, "Decryption details saved successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                }
-                
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null, "Error saving Decryption details: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
         // Progress Bar
         operationProgressBar = new JProgressBar();
         operationProgressBar.setStringPainted(true);
@@ -1050,7 +1026,6 @@ public class HomeView extends JFrame {
         buttonPanel.add(encryptButton);
         buttonPanel.add(clearButton);
         buttonPanel.add(showoutButton);
-        buttonPanel.add(savekeyButton);
         // Main layout
         JPanel contentPanel = new JPanel(new BorderLayout());
         contentPanel.add(topPanel, BorderLayout.NORTH);
@@ -1256,7 +1231,7 @@ public class HomeView extends JFrame {
         // Add all option panels to right panel
         rightPanel.add(cipherModePanel);
         rightPanel.add(paddingPanel);
-        // rightPanel.add(ivPanel);
+        rightPanel.add(ivPanel);
         rightPanel.add(keySizePanel);
         rightPanel.add(secretKeyPanel);
         rightPanel.add(outputFormatPanel);
@@ -1340,25 +1315,6 @@ public class HomeView extends JFrame {
         Files.write(file.toPath(), details.toString().getBytes(StandardCharsets.UTF_8));
     }
     
-    private void saveDecryptionDetails(File file, JComboBox<String> cipherModeComboBox,
-            JComboBox<String> paddingComboBox, String ivString, JComboBox<String> keySizeComboBox, String key) throws IOException {
-        StringBuilder details = new StringBuilder();
-        details.append("Decryption Details\n");
-        details.append("==================\n");
-        details.append("Algorithm: ").append("AES/").append("\n");
-        details.append("Cipher Mode: ").append(cipherModeComboBox.getSelectedItem().toString()).append("\n");
-        details.append("Padding: ").append(paddingComboBox.getSelectedItem().toString()).append("\n");
-        if (ivString != null) {
-            details.append("IV (Base64): ").append(ivString).append("\n");
-        } else {
-            details.append("IV: Not used (ECB Mode)\n");
-        }
-        details.append("Key Size : ").append(Integer.parseInt(keySizeComboBox.getSelectedItem().toString()))
-                .append("\n");
-        details.append("Key : ").append(key).append("\n");
-
-        Files.write(file.toPath(), details.toString().getBytes(StandardCharsets.UTF_8));
-    }
 
     private String getSelectedButtonText(ButtonGroup buttonGroup) {
         for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements();) {

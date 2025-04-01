@@ -180,7 +180,7 @@ public class EncryptionService {
         if (model.getOutputFormat().equals("Base64")) {
             encryptedData = Base64.getDecoder().decode(model.getEncryptedText());
         } else { // Hex
-            encryptedData = hexToBytes(model.getEncryptedText());
+            encryptedData = hexToBytes(model.getPlainText());
         }
         
         // Extract IV if needed

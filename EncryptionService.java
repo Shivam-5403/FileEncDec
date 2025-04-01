@@ -77,7 +77,7 @@ public class EncryptionService {
      */
     public static boolean decryptFile(EncryptionModel model) throws Exception {
         File inputFile = new File(model.getFilePath());
-        File outputFile = new File(model.getFilePath().replace(".encrypted", "_decrypted"));
+        File outputFile = new File(model.getFilePath().replace(".encrypted", ".decrypted"));
 
         if (outputFile.exists()) {
             outputFile = new File(model.getFilePath().replace(".encrypted", "") + ".decrypted");

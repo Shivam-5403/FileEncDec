@@ -36,13 +36,19 @@ public class HomeController {
         this.homeView = homeView;
     }
 
+    public void handleHome(ActionEvent e){
+        JPanel homPanel = homeView.mainHomeFrame();
+        homeView.setMainPanelContent(homPanel);
+        homeView.updateStatus("Home");
+    }
+
     public void handleFileEncrypt(ActionEvent e) {
         // homeView.updateStatus("Encrypting File...");
         // JPanel encryptPanel = new JPanel();
         // encryptPanel.add(new JLabel("Encryption Panel - Work in Progress"));
         // homeView.setMainPanelContent(encryptPanel);
         if (selectedFile == null) {
-            homeView.showMessage("Please select a file first!");
+            homeView.showMessage("Please select/open a file first from file menu!");
             return;
         } else {
             JPanel EncPanel = homeView.EncryptionView(selectedFile);
@@ -57,11 +63,18 @@ public class HomeController {
         // JPanel decryptPanel = new JPanel();
         // decryptPanel.add(new JLabel("Decryption Panel - Work in Progress"));
         // homeView.setMainPanelContent(decryptPanel);
+        String fileName = "";
         if (selectedFile == null) {
-            homeView.showMessage("Please select a file first!");
+            homeView.showMessage("Please select/open a file first from file menu!");
             return;
-        } else if (!selectedFile.getName().endsWith(".encrypted")) {
-            homeView.showMessage("Selected file is not an encrypted file (.encrypted)!");
+        } 
+        
+        if(selectedFile != null){
+            fileName = selectedFile.getName().toLowerCase();
+        }
+
+        if (!(fileName.startsWith("b64_encrypted_") || fileName.startsWith("hex_encrypted_"))) {
+            homeView.showMessage("Selected file is not a valid encrypted file (must start with 'b64_encrypted_' or 'hex_encrypted_')!");
             return;
         } else {
             JPanel DencPanel = homeView.DecryptionView(selectedFile);
@@ -74,9 +87,10 @@ public class HomeController {
             JComboBox<String> paddingComboBox, String ivString, JComboBox<String> keySizeComboBox, String key,
             ButtonGroup formatGroup) {
         byte[] decodedData = Base64.getDecoder().decode(ivString);
+        String outputFormat = formatGroup.getSelection().getActionCommand();
         EncryptionModel actualFile = new EncryptionModel(selectedFile.getPath(), key,
                 cipherModeComboBox.getSelectedItem().toString(), paddingComboBox.getSelectedItem().toString(),
-                Integer.parseInt(keySizeComboBox.getSelectedItem().toString()), formatGroup.getSelection().toString(),
+                Integer.parseInt(keySizeComboBox.getSelectedItem().toString()), outputFormat,
                 decodedData);
         boolean done = false;
         if (actualFile != null) {
@@ -95,10 +109,25 @@ public class HomeController {
     public void handleActualFileDecrypt(File selectedFile, JComboBox<String> cipherModeComboBox,
             JComboBox<String> paddingComboBox, String ivString, JComboBox<String> keySizeComboBox, String key,
             ButtonGroup formatGroup) {
-        byte[] decodedData = Base64.getDecoder().decode(ivString);
+
+        String outputFormat = formatGroup.getSelection().getActionCommand();
+
+        byte[] decodedData;
+
+        try {
+            if (outputFormat.equalsIgnoreCase("Base64")) {
+                decodedData = Base64.getDecoder().decode(ivString);
+            } else {
+                decodedData = EncryptionService.hexToBytes(ivString);
+            }
+        } catch (Exception ex) {
+            homeView.showMessage("Invalid IV: Make sure it matches the expected format (" + outputFormat + ").");
+            return;
+        }
+
         EncryptionModel actualFile = new EncryptionModel(selectedFile.getPath(), key,
                 cipherModeComboBox.getSelectedItem().toString(), paddingComboBox.getSelectedItem().toString(),
-                Integer.parseInt(keySizeComboBox.getSelectedItem().toString()), formatGroup.getSelection().toString(),
+                Integer.parseInt(keySizeComboBox.getSelectedItem().toString()), outputFormat,
                 decodedData);
         boolean done = false;
         if (actualFile != null) {
@@ -110,7 +139,8 @@ public class HomeController {
             homeView.updateStatus(e.toString() + "handle Actual");
         }
         if (done == true) {
-            homeView.updateStatus("Your File has been Decrypted.");
+            homeView.updateStatus("✅ Your File has been Decrypted.");
+            homeView.showMessage("Decryption completed successfully.");
         }
     }
 
@@ -130,10 +160,11 @@ public class HomeController {
             JComboBox<String> paddingComboBox,
             String ivString, JComboBox<String> keySizeComboBox, String key, ButtonGroup formatGroup) {
         byte[] decodedData = Base64.getDecoder().decode(ivString);
+        String outputFormat = formatGroup.getSelection().getActionCommand();
         EncryptionModel actualText = new EncryptionModel(inputTextArea.getText(), key,
                 cipherModeComboBox.getSelectedItem().toString(), paddingComboBox.getSelectedItem().toString(),
                 decodedData, Integer.parseInt(keySizeComboBox.getSelectedItem().toString()),
-                formatGroup.getSelection().toString());
+                outputFormat);
         String done = "";
         if (actualText != null) {
             homeView.updateStatus("Text Object Has been Created");
@@ -153,10 +184,11 @@ public class HomeController {
             JComboBox<String> paddingComboBox,
             String ivString, JComboBox<String> keySizeComboBox, String key, ButtonGroup formatGroup) {
         byte[] decodedData = Base64.getDecoder().decode(ivString);
+        String outputFormat = formatGroup.getSelection().getActionCommand();
         EncryptionModel actualText = new EncryptionModel(inputTextArea.getText(), key,
                 cipherModeComboBox.getSelectedItem().toString(), paddingComboBox.getSelectedItem().toString(),
                 decodedData,
-                Integer.parseInt(keySizeComboBox.getSelectedItem().toString()), formatGroup.getSelection().toString());
+                Integer.parseInt(keySizeComboBox.getSelectedItem().toString()),outputFormat);
         String done = "";
         if (actualText != null) {
             homeView.updateStatus("Text Object Has been Created");
@@ -189,6 +221,12 @@ public class HomeController {
         }
     }
 
+    public void handleKeyConvertions(ActionEvent e){
+        JPanel keyConvertionPanel = homeView.showKeyConvertionView();
+        homeView.setMainPanelContent(keyConvertionPanel);
+        homeView.updateStatus("Converting Base64/Hex <-> Normal");
+    }
+
     private void showFileSelectionPanel() {
         JPanel panel = new JPanel();
         panel.add(new JLabel("Selected File: " + selectedFile.getAbsolutePath()));
@@ -196,7 +234,7 @@ public class HomeController {
     }
 
     public void handleHelp(ActionEvent e) {
-        homeView.updateStatus("Opening Help...");
+        homeView.updateStatus("Encryption/Decryption Simulation Help...");
 
         // Create Help Panel
         JPanel helpPanel = new JPanel();

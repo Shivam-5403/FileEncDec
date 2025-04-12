@@ -63,7 +63,9 @@ public class HomeView extends JFrame {
         JMenu helpMenu = new JMenu("Help");
 
         // Create Menu Items
+        JMenuItem home = new JMenuItem("Home");
         JMenuItem openFileItem = new JMenuItem("Open File");
+        JMenuItem keyConverter = new JMenuItem("Key Converter");
         JMenuItem exitItem = new JMenuItem("Exit");
         JMenuItem encryptOption = new JMenuItem("Encrypt File");
         JMenuItem encryptOption2 = new JMenuItem("Encrypt Text");
@@ -73,7 +75,9 @@ public class HomeView extends JFrame {
         JMenuItem aboutOption = new JMenuItem("About");
 
         // Add items to their respective menus
+        fileMenu.add(home);
         fileMenu.add(openFileItem);
+        fileMenu.add(keyConverter);
         fileMenu.add(exitItem);
         encryptMenu.add(encryptOption);
         encryptMenu.add(encryptOption2);
@@ -103,7 +107,9 @@ public class HomeView extends JFrame {
         add(mainPanel, BorderLayout.CENTER);
 
         // Attach event listeners to Controller
+        home.addActionListener(controller::handleHome);
         openFileItem.addActionListener(controller::handleOpenFile);
+        keyConverter.addActionListener(controller::handleKeyConvertions);
         exitItem.addActionListener(e -> System.exit(0));
         encryptOption.addActionListener(controller::handleFileEncrypt);
         encryptOption2.addActionListener(controller::handleTextEncrypt);
@@ -113,6 +119,12 @@ public class HomeView extends JFrame {
         aboutOption.addActionListener(controller::handleHelp);
 
         setVisible(true);
+    }
+
+    public JPanel mainHomeFrame(){
+        JPanel mhomePanel = new JPanel();
+        mhomePanel.add(new JLabel("Starts exploring by clicking on Help and Navigate through Menus..."));
+        return mhomePanel;
     }
 
     public JPanel EncryptionView(File selectedFile){
@@ -259,6 +271,8 @@ public class HomeView extends JFrame {
                 // Convert to a 16-char string for display
                 ivString = Base64.getEncoder().encodeToString(iv);
                 ivTextField.setText(ivString);
+                ivTextField.setEditable(false);
+                ivTextField.setEnabled(false);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, 
                     "Error generating IV: " + ex.getMessage(), 
@@ -331,6 +345,8 @@ public class HomeView extends JFrame {
                 int keySize = Integer.parseInt((String) keySizeComboBox.getSelectedItem());
                 key = EncryptionService.generateKey(keySize);
                 secretKeyField.setText(key);
+                secretKeyField.setEditable(false);
+                secretKeyField.setEnabled(false);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, 
                     "Error generating key: " + ex.getMessage(), 
@@ -352,7 +368,9 @@ public class HomeView extends JFrame {
         
         ButtonGroup formatGroup = new ButtonGroup();
         base64RadioButton = new JRadioButton("Base64", true);
+        base64RadioButton.setActionCommand("Base64");
         hexRadioButton = new JRadioButton("Hex");
+        hexRadioButton.setActionCommand("Hex");
         
         formatGroup.add(base64RadioButton);
         formatGroup.add(hexRadioButton);
@@ -384,28 +402,38 @@ public class HomeView extends JFrame {
         JButton clearButton = new JButton("Clear");
         clearButton.addActionListener(e -> {
             // inputTextArea.setText("");
-            // outputTextArea.setText("");
+            outputTextArea.setText("");
             ivTextField.setText("");
             secretKeyField.setText("");
+            ivTextField.setEditable(true);
+            ivTextField.setEnabled(true);
+            secretKeyField.setEditable(true);
+            secretKeyField.setEnabled(true);
         });
         
         JButton showoutButton = new JButton("Show Encrypted Output");
         showoutButton.addActionListener(e -> {
             try {
-                // Get the encrypted file path (assuming default location is used)
-                String encryptedFilePath = selectedFile.getPath() + ".encrypted";
-                File encryptedFile = new File(encryptedFilePath);
+                String originalFileName = selectedFile.getName();
+                String directory = selectedFile.getParent();
         
-                if (!encryptedFile.exists()) {
-                    JOptionPane.showMessageDialog(null, "No encrypted file found!", "Error", JOptionPane.ERROR_MESSAGE);
+                // Construct possible file names
+                File base64File = new File(directory, "b64_encrypted_" + originalFileName);
+                File hexFile = new File(directory, "hex_encrypted_" + originalFileName);
+        
+                File encryptedFile;
+        
+                if (base64File.exists()) {
+                    encryptedFile = base64File;
+                } else if (hexFile.exists()) {
+                    encryptedFile = hexFile;
+                } else {
+                    JOptionPane.showMessageDialog(null, "Encrypted file not found (neither Base64 nor Hex).", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
         
-                // Read the encrypted file
-                String encryptedContent = readEncryptedFile(encryptedFile);
-        
-                // Display the encrypted content in the text area
-                outputTextArea.setText(encryptedContent);
+                String content = new String(Files.readAllBytes(encryptedFile.toPath()), StandardCharsets.UTF_8);
+                outputTextArea.setText(content);
                 outputTextArea.setEditable(false);
         
             } catch (Exception ex) {
@@ -440,7 +468,7 @@ public class HomeView extends JFrame {
         // Progress Bar
         operationProgressBar = new JProgressBar();
         operationProgressBar.setStringPainted(true);
-        operationProgressBar.setString("Ready");
+        operationProgressBar.setString("Selecting the Encrypting Parameters.");
         
         buttonPanel.add(encryptButton);
         buttonPanel.add(clearButton);
@@ -569,6 +597,8 @@ public class HomeView extends JFrame {
                 // Convert to a 16-char string for display
                 ivString = Base64.getEncoder().encodeToString(iv);
                 ivTextField.setText(ivString);
+                ivTextField.setEditable(false);
+                ivTextField.setEnabled(false);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, 
                     "Error generating IV: " + ex.getMessage(), 
@@ -641,6 +671,8 @@ public class HomeView extends JFrame {
                 int keySize = Integer.parseInt((String) keySizeComboBox.getSelectedItem());
                 key = EncryptionService.generateKey(keySize);
                 secretKeyField.setText(key);
+                secretKeyField.setEditable(false);
+                secretKeyField.setEnabled(false);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, 
                     "Error generating key: " + ex.getMessage(), 
@@ -662,7 +694,9 @@ public class HomeView extends JFrame {
         
         ButtonGroup formatGroup = new ButtonGroup();
         base64RadioButton = new JRadioButton("Base64", true);
+        base64RadioButton.setActionCommand("Base64");
         hexRadioButton = new JRadioButton("Hex");
+        hexRadioButton.setActionCommand("Hex");
         
         formatGroup.add(base64RadioButton);
         formatGroup.add(hexRadioButton);
@@ -710,19 +744,48 @@ public class HomeView extends JFrame {
         
         JButton clearButton = new JButton("Clear");
         clearButton.addActionListener(e -> {
-            // inputTextArea.setText("");
-            // outputTextArea.setText("");
+            //inputTextArea.setText("");
+            outputTextArea.setText("");
             ivTextField.setText("");
+            ivTextField.setEditable(true);
+            ivTextField.setEnabled(true);
             secretKeyField.setText("");
+            secretKeyField.setEditable(true);
+            secretKeyField.setEnabled(true);
+        });
+
+        JButton savekeyButton = new JButton("Save Key Details");
+        savekeyButton.addActionListener(e -> {
+            try {
+                // Prompt the user to select a save location
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setDialogTitle("Save Encryption Details");
+                fileChooser.setSelectedFile(new File("Text_Encryption_Details.txt"));
+                
+                int userSelection = fileChooser.showSaveDialog(null);
+                
+                if (userSelection == JFileChooser.APPROVE_OPTION) {
+                    File saveFile = fileChooser.getSelectedFile();
+                    
+                    // Write encryption details to file
+                    saveTextEncryptionDetails(saveFile,cipherModeComboBox,paddingComboBox,ivString,keySizeComboBox,key,formatGroup,inputTextArea.getText(),outputTextArea.getText());
+                    
+                    JOptionPane.showMessageDialog(null, "Text Encryption details saved successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                }
+                
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, "Error saving encryption details: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
 
         // Progress Bar
         operationProgressBar = new JProgressBar();
         operationProgressBar.setStringPainted(true);
-        operationProgressBar.setString("Ready");
+        operationProgressBar.setString("Selecting the Encrypting Parameters.");
         
         buttonPanel.add(encryptButton);
         buttonPanel.add(clearButton);
+        buttonPanel.add(savekeyButton);
         // Main layout
         JPanel contentPanel = new JPanel(new BorderLayout());
         
@@ -808,7 +871,7 @@ public class HomeView extends JFrame {
         
         // Output panel
         JPanel outputPanel = new JPanel(new BorderLayout());
-        outputPanel.setBorder(BorderFactory.createTitledBorder("Dencrypted Output"));
+        outputPanel.setBorder(BorderFactory.createTitledBorder("Decrypted Output"));
         
         outputTextArea = new JTextArea(8, 40);
         outputTextArea.setLineWrap(true);
@@ -822,7 +885,7 @@ public class HomeView extends JFrame {
         // Right section - Encryption options
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
-        rightPanel.setBorder(BorderFactory.createTitledBorder("Dencryption Options"));
+        rightPanel.setBorder(BorderFactory.createTitledBorder("Decryption Options"));
         
         // Cipher Mode
         JPanel cipherModePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -866,10 +929,7 @@ public class HomeView extends JFrame {
                 System.out.println("Focus Lost Event Triggered"); // Debugging step
 
                 if (ivText.length() != 16) {
-                    JOptionPane.showMessageDialog(ivTextField, 
-                        "IV must be exactly 16 characters long!", 
-                        "Invalid IV", JOptionPane.ERROR_MESSAGE);
-                    ivTextField.requestFocus(); // Bring focus back
+                    ivString = ivTextField.getText();
                 }else{
                     byte[] temp = ivTextField.getText().getBytes();
                     System.out.println(java.util.Arrays.toString(temp));
@@ -923,10 +983,9 @@ public class HomeView extends JFrame {
                 String keyText = new String(secretKeyField.getPassword()).trim();
 
                 if (keyText.length() != requiredLength) {
-                    JOptionPane.showMessageDialog(secretKeyField, 
-                        "Key must be exactly " + requiredLength + " characters long!", 
-                        "Invalid Key Length", JOptionPane.ERROR_MESSAGE);
-                    secretKeyField.requestFocus();
+                    char[] a = secretKeyField.getPassword();
+                    String s = String.valueOf(a);
+                    key = s;
                 }else{
                     char[] a = secretKeyField.getPassword();
                     String s = String.valueOf(a);
@@ -949,7 +1008,9 @@ public class HomeView extends JFrame {
         
         ButtonGroup formatGroup = new ButtonGroup();
         base64RadioButton = new JRadioButton("Base64", true);
+        base64RadioButton.setActionCommand("Base64");
         hexRadioButton = new JRadioButton("Hex");
+        hexRadioButton.setActionCommand("Hex");
         
         formatGroup.add(base64RadioButton);
         formatGroup.add(hexRadioButton);
@@ -981,7 +1042,7 @@ public class HomeView extends JFrame {
         JButton clearButton = new JButton("Clear");
         clearButton.addActionListener(e -> {
             // inputTextArea.setText("");
-            // outputTextArea.setText("");
+            outputTextArea.setText("");
             ivTextField.setText("");
             secretKeyField.setText("");
         });
@@ -989,33 +1050,38 @@ public class HomeView extends JFrame {
         JButton showoutButton = new JButton("Show Decrypted Output");
         showoutButton.addActionListener(e -> {
             try {
-                // Get the decrypted file path by replacing the extension
-                String decryptedFilePath = selectedFile.getPath().replace(".encrypted", ".decrypted");
-                File decryptedFile = new File(decryptedFilePath);
+                String fileName = selectedFile.getName();
+                String parentPath = selectedFile.getParent();
+        
+                // Match naming logic from decryption service
+                String baseName = fileName.replaceFirst("^b64_encrypted_|^hex_encrypted_", "");
+                String outputName = baseName.replaceAll("(\\.\\w+)$", "_decrypted$1");
+                File decryptedFile = new File(parentPath, outputName);
+        
+                // Handle _copy version fallback
+                if (!decryptedFile.exists()) {
+                    decryptedFile = new File(parentPath, outputName.replace(".", "_copy."));
+                }
         
                 if (!decryptedFile.exists()) {
-                    JOptionPane.showMessageDialog(null, "No Decrypted file found!", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "No decrypted file found!", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
+        
+                // Read decrypted file content
                 StringBuilder decryptedContent = new StringBuilder();
-                // Read the encrypted file
                 try (Scanner myReader = new Scanner(decryptedFile)) {
                     while (myReader.hasNextLine()) {
-                        decryptedContent.append(myReader.nextLine()).append("\n"); // Preserve line breaks
+                        decryptedContent.append(myReader.nextLine()).append("\n");
                     }
                 }
-                
-                // Display the decrypted content in the text area
+        
+                // Show content
                 outputTextArea.setText(decryptedContent.toString());
                 outputTextArea.setEditable(false);
-                
-            } catch (FileNotFoundException ex) {
-                updateStatus("An error occurred.");
-                ex.printStackTrace();
-            } 
-            catch (Exception ex) {
-                JOptionPane.showMessageDialog(null, "Error reading Decrypted file: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, "Error reading decrypted file: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }        
         });
 
         // Progress Bar
@@ -1130,10 +1196,7 @@ public class HomeView extends JFrame {
                 System.out.println("Focus Lost Event Triggered"); // Debugging step
 
                 if (ivText.length() != 16) {
-                    JOptionPane.showMessageDialog(ivTextField,
-                            "IV must be exactly 16 characters long!",
-                            "Invalid IV", JOptionPane.ERROR_MESSAGE);
-                    ivTextField.requestFocus(); // Bring focus back
+                    ivString = ivTextField.getText();
                 } else {
                     byte[] temp = ivTextField.getText().getBytes();
                     System.out.println(java.util.Arrays.toString(temp));
@@ -1187,10 +1250,9 @@ public class HomeView extends JFrame {
                 String keyText = new String(secretKeyField.getPassword()).trim();
 
                 if (keyText.length() != requiredLength) {
-                    JOptionPane.showMessageDialog(secretKeyField,
-                            "Key must be exactly " + requiredLength + " characters long!",
-                            "Invalid Key Length", JOptionPane.ERROR_MESSAGE);
-                    secretKeyField.requestFocus();
+                    char[] a = secretKeyField.getPassword();
+                    String s = String.valueOf(a);
+                    key = s;
                 } else {
                     char[] a = secretKeyField.getPassword();
                     String s = String.valueOf(a);
@@ -1213,7 +1275,9 @@ public class HomeView extends JFrame {
 
         ButtonGroup formatGroup = new ButtonGroup();
         base64RadioButton = new JRadioButton("Base64", true);
+        base64RadioButton.setActionCommand("Base64");
         hexRadioButton = new JRadioButton("Hex");
+        hexRadioButton.setActionCommand("Hex");
 
         formatGroup.add(base64RadioButton);
         formatGroup.add(hexRadioButton);
@@ -1295,6 +1359,94 @@ public class HomeView extends JFrame {
         return contentPanel;
     }
 
+    public JPanel showKeyConvertionView(){
+        // Main Panel
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+
+        JPanel centerPanel = new JPanel(new GridLayout(2, 1, 0, 10));
+
+        // --- Input Panel ---
+        JPanel inputPanel = new JPanel(new BorderLayout());
+        inputPanel.setBorder(BorderFactory.createTitledBorder("Plain Text or Base64"));
+
+        JTextArea inputArea = new JTextArea(8, 40);
+        inputArea.setLineWrap(true);
+        inputArea.setWrapStyleWord(true);
+        JScrollPane inputScroll = new JScrollPane(inputArea);
+        inputPanel.add(inputScroll, BorderLayout.CENTER);
+
+        // --- Output Panel ---
+        JPanel outputPanel = new JPanel(new BorderLayout());
+        outputPanel.setBorder(BorderFactory.createTitledBorder("Converted Result"));
+
+        JTextArea outputArea = new JTextArea(8, 40);
+        outputArea.setLineWrap(true);
+        outputArea.setWrapStyleWord(true);
+        outputArea.setEditable(false);
+        JScrollPane outputScroll = new JScrollPane(outputArea);
+        outputPanel.add(outputScroll, BorderLayout.CENTER);
+
+        // Add both panels to center
+        centerPanel.add(inputPanel);
+        centerPanel.add(outputPanel);
+
+        // --- Button Panel ---
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+
+        JButton toBase64Button = new JButton("Convert to Base64");
+        toBase64Button.addActionListener(e -> {
+            try {
+                String plainText = inputArea.getText().trim();
+                if (plainText.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Input is empty!");
+                    return;
+                }
+                byte[] temp = plainText.getBytes();
+                System.out.println(java.util.Arrays.toString(temp));
+                String base64 = Base64.getEncoder().encodeToString(temp);
+                // String base64 = Base64.getEncoder().encodeToString(plainText.getBytes(StandardCharsets.UTF_8));
+                outputArea.setText(base64);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, "Conversion to Base64 failed: " + ex.getMessage());
+            }
+        });
+
+        JButton toPlainTextButton = new JButton("Convert to Text");
+        toPlainTextButton.addActionListener(e -> {
+            try {
+                String base64Input = inputArea.getText().trim();
+                if (base64Input.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Input is empty!");
+                    return;
+                }
+                byte[] decodedBytes = Base64.getDecoder().decode(base64Input);
+                String plainText = new String(decodedBytes);
+                outputArea.setText(plainText);
+            } catch (IllegalArgumentException ex) {
+                JOptionPane.showMessageDialog(null, "Invalid Base64 input: " + ex.getMessage());
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, "Conversion to Text failed: " + ex.getMessage());
+            }
+        });
+
+        JButton clearButton = new JButton("Clear");
+        clearButton.addActionListener(e -> {
+            inputArea.setText("");
+            outputArea.setText("");
+        });
+
+        buttonPanel.add(toBase64Button);
+        buttonPanel.add(toPlainTextButton);
+        buttonPanel.add(clearButton);
+        // Wrap everything in main content panel
+        contentPanel.add(centerPanel, BorderLayout.CENTER);
+        contentPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        return contentPanel;
+    }
+
     private void saveEncryptionDetails(File file,JComboBox<String> cipherModeComboBox,JComboBox<String> paddingComboBox,String ivString,JComboBox<String> keySizeComboBox,String key,ButtonGroup formatGroup) throws IOException {
         StringBuilder details = new StringBuilder();
         details.append("Encryption Details\n");
@@ -1315,6 +1467,26 @@ public class HomeView extends JFrame {
         Files.write(file.toPath(), details.toString().getBytes(StandardCharsets.UTF_8));
     }
     
+    private void saveTextEncryptionDetails(File file,JComboBox<String> cipherModeComboBox,JComboBox<String> paddingComboBox,String ivString,JComboBox<String> keySizeComboBox,String key,ButtonGroup formatGroup,String input,String output) throws IOException{
+        StringBuilder details = new StringBuilder();
+        details.append("Text Encryption Details\n");
+        details.append("==================\n");
+        details.append("Input Text : ").append(input).append("\n");
+        details.append("Algorithm: ").append("AES/").append("\n");
+        details.append("Cipher Mode: ").append(cipherModeComboBox.getSelectedItem().toString()).append("\n");
+        details.append("Padding: ").append(paddingComboBox.getSelectedItem().toString()).append("\n");
+        if (ivString != null) {
+            details.append("IV (Base64): ").append(ivString).append("\n");
+        } else {
+            details.append("IV: Not used (ECB Mode)\n");
+        }
+        details.append("Key Size : ").append(Integer.parseInt(keySizeComboBox.getSelectedItem().toString())).append("\n");
+        details.append("Key : ").append(key).append("\n");
+        String selectedFormat = getSelectedButtonText(formatGroup);
+        details.append("Format Group (Base64)/Hex: ").append(selectedFormat).append("\n");
+        details.append("Encrypted Output : ").append(output).append("\n");
+        Files.write(file.toPath(), details.toString().getBytes(StandardCharsets.UTF_8));
+    }
 
     private String getSelectedButtonText(ButtonGroup buttonGroup) {
         for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements();) {
@@ -1325,11 +1497,13 @@ public class HomeView extends JFrame {
         }
         return "Unknown"; // Default if no button is selected (shouldn't happen)
     }
+
+
     
-    private String readEncryptedFile(File file) throws IOException {
-        byte[] fileBytes = Files.readAllBytes(file.toPath());
-        return Base64.getEncoder().encodeToString(fileBytes);
-    }
+    // private String readEncryptedFile(File file) throws IOException {
+    //     byte[] fileBytes = Files.readAllBytes(file.toPath());
+    //     return Base64.getEncoder().encodeToString(fileBytes);
+    // }
 
     // Method to update the main panel dynamically
     public void setMainPanelContent(JPanel newContent) {

@@ -17,6 +17,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
+import java.util.Scanner;
 
 public class EncryptionService {
     private static final int GCM_TAG_LENGTH = 128;
@@ -27,26 +28,90 @@ public class EncryptionService {
      * @return True if encryption was successful.
      * @throws Exception If encryption fails.
      */
+    // public static boolean encryptFile(EncryptionModel model) throws Exception {
+    //     File inputFile = new File(model.getFilePath());
+
+    //     // Prefix based on output format
+    //     String prefix = model.getOutputFormat().equalsIgnoreCase("Base64") ? "b64_encrypted_" : "hex_encrypted_";
+
+    //     // Extract original filename
+    //     String originalName = inputFile.getName();
+
+    //     File outputFile = new File(inputFile.getParent(), prefix + originalName);
+
+    //     try (FileInputStream inputStream = new FileInputStream(inputFile);
+    //         FileOutputStream outputStream = new FileOutputStream(outputFile)) {
+
+    //         // Compute file integrity hash
+    //         byte[] fileHash = computeFileHash(inputFile);
+    //             System.out.println("filehash completed");
+    //         // Get cipher instance and initialize
+    //         Cipher cipher = getCipher(model, Cipher.ENCRYPT_MODE);
+    //             System.out.println("cipher completed");
+    //         // Write IV to the beginning of the output file (except for ECB mode)
+    //         if (!model.getCipherMode().equalsIgnoreCase("ECB") && model.getIv() != null) {
+    //             outputStream.write(model.getIv());
+    //         }
+    //         System.out.println("Outout Stream");
+    //         // Write file integrity hash before encrypted content
+    //         outputStream.write(fileHash);
+    //         System.out.println("Outout Stream Done");
+    //         // Process file content
+    //         byte[] buffer = new byte[4096];
+    //         int bytesRead;
+    //         while ((bytesRead = inputStream.read(buffer)) != -1) {
+    //             byte[] output = cipher.update(buffer, 0, bytesRead);
+    //             if (output != null) {
+    //                 outputStream.write(output);
+    //             }
+    //         }
+    //         System.out.println("Outout Stream file write done");
+    //         byte[] finalOutput = cipher.doFinal();
+    //         if (finalOutput != null) {
+    //             outputStream.write(finalOutput);
+    //         }
+    //         System.out.println("Outout do final done");
+    //         return true;
+    //     } catch (Exception e) {
+    //         throw new Exception("Encryption failed: " + e.getMessage(), e);
+    //     }
+    // }
     public static boolean encryptFile(EncryptionModel model) throws Exception {
         File inputFile = new File(model.getFilePath());
-        File outputFile = new File(model.getFilePath() + ".encrypted");
+     
+        System.out.println("Output format: [" + model.getOutputFormat() + "]");
+        System.out.println(model.getOutputFormat().equalsIgnoreCase("Base64"));
+        // Prefix based on output format
+        String prefix = model.getOutputFormat().equalsIgnoreCase("Base64") ? "b64_encrypted_" : "hex_encrypted_";
+
+        // Extract original filename
+        String originalName = inputFile.getName();
+
+        File outputFile = new File(inputFile.getParent(), prefix + originalName);
 
         try (FileInputStream inputStream = new FileInputStream(inputFile);
             FileOutputStream outputStream = new FileOutputStream(outputFile)) {
 
+            ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
+
+            if (!model.getCipherMode().equalsIgnoreCase("ECB") && model.getIv() != null) {
+                byteBuffer.write(model.getIv()); // IV
+            }
+
             // Compute file integrity hash
             byte[] fileHash = computeFileHash(inputFile);
+            byteBuffer.write(fileHash);
                 System.out.println("filehash completed");
             // Get cipher instance and initialize
             Cipher cipher = getCipher(model, Cipher.ENCRYPT_MODE);
                 System.out.println("cipher completed");
             // Write IV to the beginning of the output file (except for ECB mode)
-            if (!model.getCipherMode().equalsIgnoreCase("ECB") && model.getIv() != null) {
-                outputStream.write(model.getIv());
-            }
+            // if (!model.getCipherMode().equalsIgnoreCase("ECB") && model.getIv() != null) {
+            //     outputStream.write(model.getIv());
+            // }
             System.out.println("Outout Stream");
             // Write file integrity hash before encrypted content
-            outputStream.write(fileHash);
+            // outputStream.write(fileHash);
             System.out.println("Outout Stream Done");
             // Process file content
             byte[] buffer = new byte[4096];
@@ -54,15 +119,23 @@ public class EncryptionService {
             while ((bytesRead = inputStream.read(buffer)) != -1) {
                 byte[] output = cipher.update(buffer, 0, bytesRead);
                 if (output != null) {
-                    outputStream.write(output);
+                    byteBuffer.write(output);
                 }
             }
             System.out.println("Outout Stream file write done");
             byte[] finalOutput = cipher.doFinal();
             if (finalOutput != null) {
-                outputStream.write(finalOutput);
+                byteBuffer.write(finalOutput);
             }
             System.out.println("Outout do final done");
+
+            // Encode to Base64 or Hex
+            byte[] encryptedBytes = byteBuffer.toByteArray();
+            String formattedOutput = model.getOutputFormat().equalsIgnoreCase("Base64")
+                    ? Base64.getEncoder().encodeToString(encryptedBytes)
+                    : bytesToHex(encryptedBytes);
+            
+            outputStream.write(formattedOutput.getBytes(StandardCharsets.UTF_8));
             return true;
         } catch (Exception e) {
             throw new Exception("Encryption failed: " + e.getMessage(), e);
@@ -75,62 +148,137 @@ public class EncryptionService {
      * @return True if decryption was successful.
      * @throws Exception If decryption fails.
      */
+    // public static boolean decryptFile(EncryptionModel model) throws Exception {
+    //     File inputFile = new File(model.getFilePath());
+    //     File outputFile = new File(model.getFilePath().replace(".encrypted", ".decrypted"));
+
+    //     if (outputFile.exists()) {
+    //         outputFile = new File(model.getFilePath().replace(".encrypted", "") + ".decrypted");
+    //     }
+
+    //     try (FileInputStream inputStream = new FileInputStream(inputFile);
+    //         FileOutputStream outputStream = new FileOutputStream(outputFile)) {
+
+    //         // Read IV from the beginning of the file (except for ECB mode)
+    //         byte[] iv = null;
+    //         if (!model.getCipherMode().equalsIgnoreCase("ECB")) {
+    //             iv = new byte[16]; // 16 bytes (128 bits) for IV
+    //             int bytesRead = inputStream.read(iv);
+    //             if (bytesRead != 16) {
+    //                 throw new Exception("Invalid encrypted file format. Cannot read IV.");
+    //             }
+    //             model.setIv(iv);
+    //         }
+
+    //          // Read the stored file integrity hash
+    //         byte[] storedFileHash = new byte[32]; // SHA-256 produces a 32-byte hash
+    //         int bytesRead = inputStream.read(storedFileHash);
+    //         if (bytesRead != 32) {
+    //             throw new Exception("Corrupt encrypted file: Missing integrity hash.");
+    //         }
+
+    //         // Get cipher instance and initialize
+    //         Cipher cipher = getCipher(model, Cipher.DECRYPT_MODE);
+
+    //         // Process file content
+    //         byte[] buffer = new byte[4096];
+    //         while ((bytesRead = inputStream.read(buffer)) != -1) {
+    //             byte[] output = cipher.update(buffer, 0, bytesRead);
+    //             if (output != null) {
+    //                 outputStream.write(output);
+    //             }
+    //         }
+
+    //         byte[] finalOutput = cipher.doFinal();
+    //         if (finalOutput != null) {
+    //             outputStream.write(finalOutput);
+    //         }
+
+    //         // Verify file integrity
+    //         byte[] decryptedFileHash = computeFileHash(outputFile);
+    //         if (!MessageDigest.isEqual(storedFileHash, decryptedFileHash)) {
+    //             throw new Exception("File integrity check failed: Decrypted file does not match original.");
+    //         }
+
+    //         return true;
+    //     } catch (Exception e) {
+    //         throw new Exception("Decryption failed: " + e.getMessage(), e);
+    //     }
+    // }
     public static boolean decryptFile(EncryptionModel model) throws Exception {
         File inputFile = new File(model.getFilePath());
-        File outputFile = new File(model.getFilePath().replace(".encrypted", ".decrypted"));
 
-        if (outputFile.exists()) {
-            outputFile = new File(model.getFilePath().replace(".encrypted", "") + ".decrypted");
+        // Detect format based on prefix
+        String fileName = inputFile.getName().toLowerCase();
+        boolean isBase64 = fileName.startsWith("b64_");
+        boolean isHex = fileName.startsWith("hex_");
+
+        if (!isBase64 && !isHex) {
+            throw new Exception("Unknown format: filename must start with 'b64_' or 'hex_'");
         }
 
-        try (FileInputStream inputStream = new FileInputStream(inputFile);
-            FileOutputStream outputStream = new FileOutputStream(outputFile)) {
+         // Remove prefix and add _decrypted before extension
+        String baseName = fileName.replaceFirst("^b64_encrypted_|^hex_encrypted_", "");
+        String outputName = baseName.replaceAll("(\\.\\w+)$", "_decrypted$1");
+        File outputFile = new File(inputFile.getParent(), outputName);
 
-            // Read IV from the beginning of the file (except for ECB mode)
-            byte[] iv = null;
-            if (!model.getCipherMode().equalsIgnoreCase("ECB")) {
-                iv = new byte[16]; // 16 bytes (128 bits) for IV
-                int bytesRead = inputStream.read(iv);
-                if (bytesRead != 16) {
-                    throw new Exception("Invalid encrypted file format. Cannot read IV.");
+        if (outputFile.exists()) {
+            outputFile = new File(inputFile.getParent(), outputName.replace(".", "_copy."));
+        }
+
+        try {
+        // Read the full content as encoded text
+            StringBuilder encodedContent = new StringBuilder();
+            try (Scanner scanner = new Scanner(inputFile)) {
+                while (scanner.hasNextLine()) {
+                    encodedContent.append(scanner.nextLine());
                 }
+            }
+
+            // Decode to raw bytes
+            byte[] allBytes = isBase64
+                    ? Base64.getDecoder().decode(encodedContent.toString())
+                    : hexToBytes(encodedContent.toString());
+
+            int currentIndex = 0;
+
+            // Extract IV if required
+            if (!model.getCipherMode().equalsIgnoreCase("ECB")) {
+                byte[] iv = new byte[16];
+                System.arraycopy(allBytes, currentIndex, iv, 0, 16);
                 model.setIv(iv);
+                currentIndex += 16;
             }
 
-             // Read the stored file integrity hash
-            byte[] storedFileHash = new byte[32]; // SHA-256 produces a 32-byte hash
-            int bytesRead = inputStream.read(storedFileHash);
-            if (bytesRead != 32) {
-                throw new Exception("Corrupt encrypted file: Missing integrity hash.");
-            }
+            // Extract hash
+            byte[] storedFileHash = new byte[32];
+            System.arraycopy(allBytes, currentIndex, storedFileHash, 0, 32);
+            currentIndex += 32;
 
-            // Get cipher instance and initialize
+            // Prepare cipher
             Cipher cipher = getCipher(model, Cipher.DECRYPT_MODE);
 
-            // Process file content
-            byte[] buffer = new byte[4096];
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                byte[] output = cipher.update(buffer, 0, bytesRead);
-                if (output != null) {
-                    outputStream.write(output);
-                }
+            // Decrypt content
+            byte[] decryptedBytes = cipher.doFinal(allBytes, currentIndex, allBytes.length - currentIndex);
+
+            // Write to output
+            try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
+                outputStream.write(decryptedBytes);
             }
 
-            byte[] finalOutput = cipher.doFinal();
-            if (finalOutput != null) {
-                outputStream.write(finalOutput);
+            // Check file integrity
+            byte[] newFileHash = computeFileHash(outputFile);
+            if (!MessageDigest.isEqual(storedFileHash, newFileHash)) {
+                throw new Exception("Integrity check failed: decrypted content doesn't match original.");
             }
 
-            // Verify file integrity
-            byte[] decryptedFileHash = computeFileHash(outputFile);
-            if (!MessageDigest.isEqual(storedFileHash, decryptedFileHash)) {
-                throw new Exception("File integrity check failed: Decrypted file does not match original.");
-            }
-
+            System.out.println("Decrypted file saved: " + outputFile.getAbsolutePath());
             return true;
+
         } catch (Exception e) {
             throw new Exception("Decryption failed: " + e.getMessage(), e);
         }
+
     }
 
     /**
@@ -316,7 +464,7 @@ public class EncryptionService {
     }
 
     // Helper method to convert bytes to a hex string.
-    private static String bytesToHex(byte[] bytes) {
+    public static String bytesToHex(byte[] bytes) {
         StringBuilder hexString = new StringBuilder();
         for (byte b : bytes) {
             String hex = Integer.toHexString(0xff & b);
@@ -331,7 +479,7 @@ public class EncryptionService {
     /**
      * Converts a hex string to a byte array.
      */
-    private static byte[] hexToBytes(String hex) {
+    public static byte[] hexToBytes(String hex) {
         int len = hex.length();
         byte[] data = new byte[len / 2];
         for (int i = 0; i < len; i += 2) {

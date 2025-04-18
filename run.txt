@@ -1,0 +1,2 @@
+javac -d . *.java
+java com.tech_titans.main.MainApp

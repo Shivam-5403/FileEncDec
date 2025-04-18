@@ -9,3 +9,4 @@ public class MainApp {
         SwingUtilities.invokeLater(() -> new HomeView().setVisible(true));
     }
 }
+// java com.tech_titans.main.MainApp

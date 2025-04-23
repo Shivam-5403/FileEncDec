@@ -28,18 +28,6 @@ public class EncryptionModel {
         this.iv = iv;
     }
 
-    // // 🔹 Constructor for file decryption
-    // public EncryptionModel(String filePath, String encryptionKey, String cipherMode, 
-    //                     String padding, int keySize,String outputFormat, byte[] iv) {
-    //     this.filePath = filePath;
-    //     this.encryptionKey = encryptionKey;
-    //     this.cipherMode = cipherMode; // Default mode
-    //     this.padding = padding; // Default padding
-    //     this.keySize = keySize; // Default key size
-    //     this.outputFormat = outputFormat; // Default output format
-    //     this.iv = iv;
-    // }
-
     // 🔹 Constructor for text encryption
     public EncryptionModel(String plainText, String encryptionKey, String cipherMode, 
                         String padding, byte[] iv, int keySize, String outputFormat) {
@@ -51,18 +39,6 @@ public class EncryptionModel {
         this.keySize = keySize;
         this.outputFormat = outputFormat;
     }
-
-    // // 🔹 Constructor for text decryption
-    // public EncryptionModel(String encryptedText, String encryptionKey, String cipherMode, 
-    //                     String padding, byte[] iv, int keySize, String outputFormat) {
-    //     this.encryptedText = encryptedText;
-    //     this.encryptionKey = encryptionKey;
-    //     this.cipherMode = cipherMode;
-    //     this.padding = padding;
-    //     this.iv = iv;
-    //     this.keySize = keySize;
-    //     this.outputFormat = outputFormat;
-    // }
 
     public EncryptionModel(String filePath, String password, byte[] salt, byte[] iv, String cipherMode) {
         this.filePath = filePath;

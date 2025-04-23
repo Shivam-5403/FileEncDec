@@ -7,6 +7,7 @@ import com.tech_titans.service.EncryptionService;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -461,6 +462,7 @@ public class HomeView extends JFrame {
         JScrollPane inputScrollPane = new JScrollPane(inputTextArea);
         inputPanel.add(inputScrollPane, BorderLayout.CENTER);
         StringBuilder text = new StringBuilder();
+        // change this function to work as byte reader
         if (selectedFile != null) {
             try (Scanner myReader = new Scanner(selectedFile)) {
                 while (myReader.hasNextLine()) {
@@ -701,24 +703,35 @@ public class HomeView extends JFrame {
             try {
                 String originalFileName = selectedFile.getName();
                 String directory = selectedFile.getParent();
-
+                File base64File = null;
+                File hexFile = null;
+                String outputFormat = formatGroup.getSelection().getActionCommand();
                 // Construct possible file names
-                File base64File = new File(directory, "b64_encrypted_" + originalFileName);
-                File hexFile = new File(directory, "hex_encrypted_" + originalFileName);
+                if (outputFormat.equals("Base64")) { base64File = new File(directory, "b64_encrypted_" + originalFileName);} 
+                else{ hexFile = new File(directory, "hex_encrypted_" + originalFileName);}
 
                 File encryptedFile;
 
-                if (base64File.exists()) {
+                if (base64File != null) {
                     encryptedFile = base64File;
-                } else if (hexFile.exists()) {
+                } else if (hexFile != null) {
                     encryptedFile = hexFile;
                 } else {
                     JOptionPane.showMessageDialog(null, "Encrypted file not found (neither Base64 nor Hex).", "Error",
                             JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-
-                String content = new String(Files.readAllBytes(encryptedFile.toPath()), StandardCharsets.UTF_8);
+                StringBuilder t = new StringBuilder();
+                try (Scanner myReader = new Scanner(encryptedFile)) {
+                    while (myReader.hasNextLine()) {
+                        t.append(myReader.nextLine()).append("\n"); // Preserve line breaks
+                    }
+                } catch (FileNotFoundException eo) {
+                    updateStatus("An error occurred.");
+                    eo.printStackTrace();
+                }
+                // String content = new String(Files.readAllBytes(encryptedFile.toPath()), StandardCharsets.UTF_8);
+                String content = t.toString();
                 outputTextArea.setText(content);
                 outputTextArea.setEditable(false);
 
@@ -1655,6 +1668,56 @@ public class HomeView extends JFrame {
         return contentPanel;
     }
 
+    public JPanel fileContentPanel(File selectedFile){
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        // contentPanel.add(new JLabel("Selected File: " + selectedFile.getAbsolutePath()));
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JPanel centerPanel = new JPanel(new GridLayout(2, 1, 0, 10));
+
+        // --- Input Panel ---
+        JPanel inputPanel = new JPanel(new BorderLayout());
+        inputPanel.setBorder(BorderFactory.createTitledBorder("Selected File"));
+
+        JTextArea inputArea = new JTextArea(3, 40);
+        inputArea.setText(selectedFile.getAbsolutePath());
+        inputArea.setLineWrap(true);
+        inputArea.setWrapStyleWord(true);
+        JScrollPane inputScroll = new JScrollPane(inputArea);
+        inputPanel.add(inputScroll, BorderLayout.CENTER);
+
+        // --- Output Panel ---
+        JPanel outputPanel = new JPanel(new BorderLayout());
+        outputPanel.setBorder(BorderFactory.createTitledBorder("Internal File Content (Readable if .txt)"));
+
+        JTextArea outputArea = new JTextArea(8, 40);
+        outputArea.setLineWrap(true);
+        outputArea.setWrapStyleWord(true);
+        outputArea.setEditable(false);
+        JScrollPane outputScroll = new JScrollPane(outputArea);
+        outputPanel.add(outputScroll, BorderLayout.CENTER);
+
+        // Add both panels to center
+        centerPanel.add(inputPanel);
+        centerPanel.add(outputPanel);
+
+        // --- Button Panel ---
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        updateStatus("Your File is Being readed...");
+        JButton readButton = new JButton("Show Content");
+        readButton.addActionListener(e -> {
+            String content = controller.handleFileRead(selectedFile);
+            outputArea.setText(content);
+        });
+
+        buttonPanel.add(readButton);
+        // Wrap everything in main content panel
+        contentPanel.add(centerPanel, BorderLayout.CENTER);
+        contentPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        return contentPanel;
+    }
+
     public JPanel showKeyConvertionView() {
         // Main Panel
         JPanel contentPanel = new JPanel(new BorderLayout());
@@ -1800,11 +1863,6 @@ public class HomeView extends JFrame {
         return "Unknown"; // Default if no button is selected (shouldn't happen)
     }
 
-    // private String readEncryptedFile(File file) throws IOException {
-    // byte[] fileBytes = Files.readAllBytes(file.toPath());
-    // return Base64.getEncoder().encodeToString(fileBytes);
-    // }
-
     // Method to update the main panel dynamically
     public void setMainPanelContent(JPanel newContent) {
         mainPanel.removeAll(); // Clear previous content
@@ -1815,6 +1873,12 @@ public class HomeView extends JFrame {
 
     public void updateStatus(String message) {
         progressBar.setString(message);
+        progressBar.setValue(0);
+    }
+
+    public void updateStatusLive(int progressPercentage){
+        progressBar.setValue(progressPercentage);
+        progressBar.setString("Your File is being readed : "+progressPercentage + "% completed");
     }
 
     public void showMessage(String message) {

@@ -7,6 +7,7 @@ import com.tech_titans.model.EncryptionModel;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -25,21 +26,7 @@ public class HomeController {
     private HomeView homeView;
     private File selectedFile;
     private FileTransferService fileTransferService;
-    // private JRadioButton fileRadioButton;
-    // private JRadioButton textRadioButton;
-    // private JTextArea inputTextArea;
-    // private JTextArea outputTextArea;
-    // private JComboBox<String> cipherModeComboBox;
-    // private JComboBox<String> paddingComboBox;
-    // private JTextField ivTextField;
-    // private JComboBox<String> keySizeComboBox;
-    // private JPasswordField secretKeyField;
-    // private JRadioButton base64RadioButton;
-    // private JRadioButton hexRadioButton;
-    // private JButton generateIvButton;
-    // private JButton generateKeyButton;
-    // private JProgressBar operationProgressBar;
-
+    
     public HomeController(HomeView homeView) {
         this.homeView = homeView;
         this.fileTransferService = new FileTransferService();
@@ -226,10 +213,7 @@ public class HomeController {
     }
 
     public void handleFileEncrypt(ActionEvent e) {
-        // homeView.updateStatus("Encrypting File...");
-        // JPanel encryptPanel = new JPanel();
-        // encryptPanel.add(new JLabel("Encryption Panel - Work in Progress"));
-        // homeView.setMainPanelContent(encryptPanel);
+        
         if (selectedFile == null) {
             homeView.showMessage("Please select/open a file first from file menu!");
             return;
@@ -242,10 +226,7 @@ public class HomeController {
     }
 
     public void handleFileDecrypt(ActionEvent e) {
-        // homeView.updateStatus("Decrypting File...");
-        // JPanel decryptPanel = new JPanel();
-        // decryptPanel.add(new JLabel("Decryption Panel - Work in Progress"));
-        // homeView.setMainPanelContent(decryptPanel);
+        
         String fileName = "";
         if (selectedFile == null) {
             homeView.showMessage("Please select/open a file first from file menu!");
@@ -388,6 +369,23 @@ public class HomeController {
         return done;
     }
 
+    public String handleFileRead(File selectedFile){
+        StringBuilder text = new StringBuilder();
+        
+        if (selectedFile != null) {
+            int byteData;
+            try (FileInputStream fis = new FileInputStream(selectedFile)) {
+                while ((byteData = fis.read()) != -1) {
+                    text.append((char) byteData);
+                }
+            }catch(Exception e){
+                homeView.updateStatus(e.getMessage());
+            }
+        }
+        homeView.updateStatus("File Reading is Completed");
+        return text.toString();
+    }
+
     public void handleSettings(ActionEvent e) {
         homeView.updateStatus("Opening Settings...");
         JPanel settingsPanel = new JPanel();
@@ -412,8 +410,7 @@ public class HomeController {
     }
 
     private void showFileSelectionPanel() {
-        JPanel panel = new JPanel();
-        panel.add(new JLabel("Selected File: " + selectedFile.getAbsolutePath()));
+        JPanel panel = homeView.fileContentPanel(selectedFile);
         homeView.setMainPanelContent(panel);
     }
 

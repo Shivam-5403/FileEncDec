@@ -1674,13 +1674,13 @@ public class HomeView extends JFrame {
         // contentPanel.add(new JLabel("Selected File: " + selectedFile.getAbsolutePath()));
         contentPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        JPanel centerPanel = new JPanel(new GridLayout(2, 1, 0, 10));
+        JPanel centerPanel = new JPanel(new BorderLayout());
 
         // --- Input Panel ---
         JPanel inputPanel = new JPanel(new BorderLayout());
         inputPanel.setBorder(BorderFactory.createTitledBorder("Selected File"));
 
-        JTextArea inputArea = new JTextArea(3, 40);
+        JTextArea inputArea = new JTextArea(2, 40);
         inputArea.setText(selectedFile.getAbsolutePath());
         inputArea.setLineWrap(true);
         inputArea.setWrapStyleWord(true);
@@ -1690,8 +1690,8 @@ public class HomeView extends JFrame {
         // --- Output Panel ---
         JPanel outputPanel = new JPanel(new BorderLayout());
         outputPanel.setBorder(BorderFactory.createTitledBorder("Internal File Content (Readable if .txt)"));
-
-        JTextArea outputArea = new JTextArea(8, 40);
+        
+        JTextArea outputArea = new JTextArea(12, 40);
         outputArea.setLineWrap(true);
         outputArea.setWrapStyleWord(true);
         outputArea.setEditable(false);
@@ -1699,8 +1699,8 @@ public class HomeView extends JFrame {
         outputPanel.add(outputScroll, BorderLayout.CENTER);
 
         // Add both panels to center
-        centerPanel.add(inputPanel);
-        centerPanel.add(outputPanel);
+        centerPanel.add(inputPanel,BorderLayout.NORTH);
+        centerPanel.add(outputPanel,BorderLayout.CENTER);
 
         // --- Button Panel ---
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));

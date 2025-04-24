@@ -1,2 +1,3 @@
 javac -d . *.java
 java com.tech_titans.main.MainApp
+jar cfm FileEncryptioinSimulation.jar MANIFEST.MF -C out .

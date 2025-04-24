@@ -1704,7 +1704,7 @@ public class HomeView extends JFrame {
 
         // --- Button Panel ---
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        updateStatus("Your File is Being readed... It may take some time based on your content/size after clicking on Show");
+        updateStatus("Your File is Being readed... It may take some time based on your file content/size after clicking on Show");
         JButton readButton = new JButton("Show Content");
         readButton.addActionListener(e -> {
             String content = controller.handleFileRead(selectedFile);

@@ -1690,7 +1690,7 @@ public class HomeView extends JFrame {
         // --- Output Panel ---
         JPanel outputPanel = new JPanel(new BorderLayout());
         outputPanel.setBorder(BorderFactory.createTitledBorder("Internal File Content (Readable if .txt)"));
-        
+
         JTextArea outputArea = new JTextArea(12, 40);
         outputArea.setLineWrap(true);
         outputArea.setWrapStyleWord(true);
@@ -1704,7 +1704,7 @@ public class HomeView extends JFrame {
 
         // --- Button Panel ---
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        updateStatus("Your File is Being readed...");
+        updateStatus("Your File is Being readed... It may take some time based on your content/size after clicking on Show");
         JButton readButton = new JButton("Show Content");
         readButton.addActionListener(e -> {
             String content = controller.handleFileRead(selectedFile);

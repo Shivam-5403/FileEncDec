@@ -336,7 +336,7 @@ public class HomeView extends JFrame {
         JMenu fileMenu = new JMenu("File");
         JMenu encryptMenu = new JMenu("Encryption");
         JMenu decryptMenu = new JMenu("Decryption");
-        JMenu sharingMenu = new JMenu("Export/Import");
+        JMenu sharingMenu = new JMenu("File Transfer");
         JMenu settingsMenu = new JMenu("Settings");
         JMenu helpMenu = new JMenu("Help");
 
@@ -404,8 +404,9 @@ public class HomeView extends JFrame {
         // handlers
         sendMenuItem.addActionListener(controller::handleSendFile);
         recivMenuItem.addActionListener(controller::handleReceiveFile);
-
+        controller.handleHelp(null);
         setVisible(true);
+
     }
 
     public JPanel mainHomeFrame() {

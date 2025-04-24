@@ -705,7 +705,7 @@ public class HomeController {
                 "   • Click 'Browse' to select the file you wish to send\n" +
                 "   • Enter the receiver's IP address (IPv4 or IPv6)\n" +
                 "   • Verify the port number (default is 9999)\n" +
-                "   • Configure encryption settings as desired\n" +
+               
                 "   • Click 'Start Sending' to begin the transfer\n" +
                 "3. The progress bar will show the transfer status\n" +
                 "4. Once complete, a confirmation message will appear\n\n" +

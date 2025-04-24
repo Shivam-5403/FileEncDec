@@ -539,10 +539,11 @@ public class HomeView extends JFrame {
                 System.out.println("Focus Lost Event Triggered"); // Debugging step
 
                 if (ivText.length() != 16) {
-                    JOptionPane.showMessageDialog(ivTextField,
-                            "IV must be exactly 16 characters long!",
-                            "Invalid IV", JOptionPane.ERROR_MESSAGE);
-                    ivTextField.requestFocus(); // Bring focus back
+                    // JOptionPane.showMessageDialog(ivTextField,
+                    //         "IV must be exactly 16 characters long!",
+                    //         "Invalid IV", JOptionPane.ERROR_MESSAGE);
+                    // ivTextField.requestFocus(); // Bring focus back
+                    updateStatus("IV must be exactly 16 characters long! Invalid IV");
                 } else {
                     byte[] temp = ivTextField.getText().getBytes();
                     System.out.println(java.util.Arrays.toString(temp));
@@ -560,6 +561,7 @@ public class HomeView extends JFrame {
                 ivTextField.setText(ivString);
                 ivTextField.setEditable(false);
                 ivTextField.setEnabled(false);
+                updateStatus("Done");
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this,
                         "Error generating IV: " + ex.getMessage(),
@@ -613,10 +615,11 @@ public class HomeView extends JFrame {
                 String keyText = new String(secretKeyField.getPassword()).trim();
 
                 if (keyText.length() != requiredLength) {
-                    JOptionPane.showMessageDialog(secretKeyField,
-                            "Key must be exactly " + requiredLength + " characters long!",
-                            "Invalid Key Length", JOptionPane.ERROR_MESSAGE);
-                    secretKeyField.requestFocus();
+                    // JOptionPane.showMessageDialog(secretKeyField,
+                    //         "Key must be exactly " + requiredLength + " characters long!",
+                    //         "Invalid Key Length", JOptionPane.ERROR_MESSAGE);
+                    // secretKeyField.requestFocus();
+                    updateStatus("Key must be exactly " + requiredLength + " characters long! Invalid Key Length");
                 } else {
                     char[] a = secretKeyField.getPassword();
                     String s = String.valueOf(a);
@@ -634,6 +637,7 @@ public class HomeView extends JFrame {
                 secretKeyField.setText(key);
                 secretKeyField.setEditable(false);
                 secretKeyField.setEnabled(false);
+                updateStatus("Done");
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this,
                         "Error generating key: " + ex.getMessage(),
@@ -882,10 +886,11 @@ public class HomeView extends JFrame {
                 System.out.println("Focus Lost Event Triggered"); // Debugging step
 
                 if (ivText.length() != 16) {
-                    JOptionPane.showMessageDialog(ivTextField,
-                            "IV must be exactly 16 characters long!",
-                            "Invalid IV", JOptionPane.ERROR_MESSAGE);
-                    ivTextField.requestFocus(); // Bring focus back
+                    // JOptionPane.showMessageDialog(ivTextField,
+                    //         "IV must be exactly 16 characters long!",
+                    //         "Invalid IV", JOptionPane.ERROR_MESSAGE);
+                    // ivTextField.requestFocus(); // Bring focus back
+                    updateStatus("IV must be exactly 16 characters long! Invalid IV");
                 } else {
                     byte[] temp = ivTextField.getText().getBytes();
                     System.out.println(java.util.Arrays.toString(temp));
@@ -903,6 +908,7 @@ public class HomeView extends JFrame {
                 ivTextField.setText(ivString);
                 ivTextField.setEditable(false);
                 ivTextField.setEnabled(false);
+                updateStatus("Done");
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this,
                         "Error generating IV: " + ex.getMessage(),
@@ -956,10 +962,11 @@ public class HomeView extends JFrame {
                 String keyText = new String(secretKeyField.getPassword()).trim();
 
                 if (keyText.length() != requiredLength) {
-                    JOptionPane.showMessageDialog(secretKeyField,
-                            "Key must be exactly " + requiredLength + " characters long!",
-                            "Invalid Key Length", JOptionPane.ERROR_MESSAGE);
-                    secretKeyField.requestFocus();
+                    // JOptionPane.showMessageDialog(secretKeyField,
+                    //         "Key must be exactly " + requiredLength + " characters long!",
+                    //         "Invalid Key Length", JOptionPane.ERROR_MESSAGE);
+                    // // secretKeyField.requestFocus();
+                    updateStatus("Key must be exactly " + requiredLength + " characters long! Invalid Key Length");
                 } else {
                     char[] a = secretKeyField.getPassword();
                     String s = String.valueOf(a);
@@ -977,6 +984,7 @@ public class HomeView extends JFrame {
                 secretKeyField.setText(key);
                 secretKeyField.setEditable(false);
                 secretKeyField.setEnabled(false);
+                updateStatus("Done");
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this,
                         "Error generating key: " + ex.getMessage(),

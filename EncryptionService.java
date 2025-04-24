@@ -212,7 +212,7 @@ public class EncryptionService {
         // Decode the input based on format
         byte[] encryptedData;
         if (model.getOutputFormat().equals("Base64")) {
-            encryptedData = Base64.getDecoder().decode(model.getEncryptedText());
+            encryptedData = Base64.getDecoder().decode(model.getPlainText());
         } else { // Hex
             encryptedData = hexToBytes(model.getPlainText());
         }

@@ -97,6 +97,7 @@ public class HomeController {
         progressBar.setString("Connecting...");
 
         try {
+            // last parameter is the whole function..
             fileTransferService.sendFile(fileToSend, ipAddress, port, new FileTransferService.ProgressCallback() {
                 @Override
                 public void onProgressUpdate(int progressPercentage) {

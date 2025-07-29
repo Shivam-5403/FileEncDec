@@ -12,7 +12,24 @@ public class FileTransferService {
     private boolean serverRunning = false;
     private ServerSocket serverSocket;
 
+//     A thread pool is a group of worker threads that are created once and reused to execute multiple tasks. Instead of creating a new thread every time a task is submitted (which is costly), you reuse existing threads.
+
+// Java provides the ExecutorService interface and Executors utility class to manage thread pools efficiently.
+
     // Send a file to a specified IP address
+
+
+
+//     ✅ Executors.newFixedThreadPool(5)
+// This line creates a fixed-size thread pool with 5 threads.
+
+// You can submit multiple tasks to this pool.
+
+// At most 5 tasks will run concurrently.
+
+// If more than 5 tasks are submitted, the extras will wait in a queue until a thread becomes free.
+
+
     public void sendFile(File file, String ipAddress, int port, ProgressCallback callback) throws IOException {
         executorService.submit(() -> {
             try (Socket socket = new Socket(ipAddress, port);
@@ -33,8 +50,8 @@ public class FileTransferService {
                 long totalBytesSent = 0;
 
                 while ((bytesRead = fileInputStream.read(buffer)) != -1) {
-                    outputStream.write(buffer, 0, bytesRead);
-                    totalBytesSent += bytesRead;
+                    outputStream.write(buffer, 0, bytesRead); // 0 -> The starting offset in the buffer (i.e., where to start reading from).
+                    totalBytesSent += bytesRead; 
                     if (callback != null) {
                         int progress = (int) ((totalBytesSent * 100) / fileSize);
                         callback.onProgressUpdate(progress);
